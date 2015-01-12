@@ -1,4 +1,4 @@
-# masterpasswordapp-chrome
+# masterpassword-chrome
 Master Password implemented as a Chrome extension
 
 Only the most basic features implemented as of now.
