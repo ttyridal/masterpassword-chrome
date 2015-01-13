@@ -66,9 +66,15 @@ function recalculate() {
 
 function popup() {
     var recalc=false;
-    if (chrome.extension.getBackgroundPage().session_store.username==null) {
+    if (chrome.extension.getBackgroundPage().session_store.username==null || chrome.extension.getBackgroundPage().session_store.masterkey==null) {
         $('#main').hide();
         $('#sessionsetup').show();
+        if (chrome.extension.getBackgroundPage().session_store.username==null)
+            $('#username').focus()
+        else {
+            $('#username').val(chrome.extension.getBackgroundPage().session_store.username)
+            $('#masterkey').focus()
+        }
     } else
         recalc=true;
     get_active_tab_url().then(function(url){
@@ -98,6 +104,7 @@ $('#sessionsetup > form').on('submit', function(){
     }
     chrome.extension.getBackgroundPage().session_store.username=$('#username').val();
     chrome.extension.getBackgroundPage().session_store.masterkey=$('#masterkey').val();
+    chrome.storage.sync.set({'username':chrome.extension.getBackgroundPage().session_store.username});
 
     $('#sessionsetup').hide();
     $('#main').show();
