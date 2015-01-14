@@ -8,6 +8,14 @@ chrome.storage.sync.get('username', function(itms) {
         session_store.username = itms.username;
 });
 
+
+function store_update(d) {
+    session_store = d;
+    chrome.storage.sync.set({'username':d.username});
+}
+
+
+
 //example of using a message handler from the inject scripts
 chrome.extension.onMessage.addListener(
   function(request, sender, sendResponse) {

@@ -21,6 +21,7 @@
         user-select: none;
     }
     body { font-size:10pt; padding-top:4px;}
+    html,body,div { overflow: hidden;}
     input,select { margin-bottom:0.8em;}
 	#usermessage {
         text-align:left;
@@ -40,7 +41,7 @@
 <div id="sessionsetup" style="display:none">
     <form>
         <label for="username">Your (full) name<br><input id="username" placeholder="Your Name"/></label><br>
-        <label for="masterkey">Master password<br><input id="masterkey" type="password" placeholder="password"/></label><br>
+        <label for="masterkey">Master password<br><input id="masterkey" type="password" placeholder="password" autocomplete="off"/></label><br>
         <input type="submit" value="OK" style="margin-top:1em"/>
     </form>
 </div>

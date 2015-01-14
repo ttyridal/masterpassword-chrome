@@ -36,6 +36,7 @@ function copy_to_clipboard(mimetype, data) {
 }
 
 var mpw=null;
+var session_store={};
 
 function recalculate() {
     $('#usermessage').html("Please wait...");
@@ -45,8 +46,8 @@ function recalculate() {
     }
     if (!mpw)
         mpw = new MPW(
-        chrome.extension.getBackgroundPage().session_store.username,
-        chrome.extension.getBackgroundPage().session_store.masterkey);
+        session_store.username,
+        session_store.masterkey);
 
 
     console.log("calc password "+$('#sitename').val()+" . "+parseInt($('#passwdgeneration').val())+" . "+$('#passwdtype').val());
@@ -59,21 +60,21 @@ function recalculate() {
         $('#thepassword').html(pass);
 
         copy_to_clipboard("text/plain",pass);
-
         $('#usermessage').html("Password for "+$('#sitename').val()+" copied to clipboard");
     });
 }
 
-function popup() {
+function popup(session_store_) {
     var recalc=false;
-    if (chrome.extension.getBackgroundPage().session_store.username==null || chrome.extension.getBackgroundPage().session_store.masterkey==null) {
+    session_store = session_store_;
+    if (session_store.username==null || session_store.masterkey==null) {
         $('#main').hide();
         $('#sessionsetup').show();
-        if (chrome.extension.getBackgroundPage().session_store.username==null)
-            $('#username').focus()
+        if (session_store.username==null)
+            $('#username').focus();
         else {
-            $('#username').val(chrome.extension.getBackgroundPage().session_store.username)
-            $('#masterkey').focus()
+            $('#username').val(session_store.username);
+            $('#masterkey').focus();
         }
     } else
         recalc=true;
@@ -88,8 +89,10 @@ function popup() {
         if(recalc)
             recalculate();
     });
-
 }
+window.addEventListener('load', function () {
+    popup(chrome.extension.getBackgroundPage().session_store);
+},false);
 
 $('#sessionsetup > form').on('submit', function(){
     if ($('#username').val().length < 2) {
@@ -102,9 +105,9 @@ $('#sessionsetup > form').on('submit', function(){
         $('#masterkey').focus();
         return false;
     }
-    chrome.extension.getBackgroundPage().session_store.username=$('#username').val();
-    chrome.extension.getBackgroundPage().session_store.masterkey=$('#masterkey').val();
-    chrome.storage.sync.set({'username':chrome.extension.getBackgroundPage().session_store.username});
+    session_store.username=$('#username').val();
+    session_store.masterkey=$('#masterkey').val();
+    chrome.extension.getBackgroundPage().store_update(session_store);
 
     $('#sessionsetup').hide();
     $('#main').show();
@@ -123,6 +126,5 @@ $('#siteconfig_show').on('click', function(){
 $('#siteconfig').on('change','select,input',recalculate);
 $('#sitename').on('change',recalculate);
 
-window.addEventListener('load', popup,false);
 }());
 
