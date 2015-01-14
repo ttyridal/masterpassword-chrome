@@ -47,10 +47,11 @@
 </div>
 
 <div id="main">
-    <input id="sitename" type="text" style="background-color:rgba(60,60,60,0.6);width:100%;text-align:center;font-size:2em;margin-bottom:0;color:white" placeholder="site"><br>
+    <input id="sitename" class="domain" type="text" style="background-color:rgba(60,60,60,0.6);width:100%;text-align:center;font-size:2em;margin-bottom:0;color:white" placeholder="site"/><br>
 <a id="siteconfig_show" href="">[advanced]</a>
 <div id="siteconfig" style="display:none;background-color:rgba(60,60,60,0.6);padding:0.8em 0 0 0;">
     <form>
+        <input id="domain" class="domain" type="hidden"/><br>
         <label for="passwdtype">Password type<br><select id="passwdtype">
             <option value="maximum">Maximum
             <option value="long" selected>Long

@@ -1,17 +1,25 @@
 var session_store = {
     'username':null,
-    'masterkey':null
+    'masterkey':null,
+    'sites':{}
 }
 console.log('background loaded');
-chrome.storage.sync.get('username', function(itms) {
+chrome.storage.sync.get(['username','sites'], function(itms) {
     if (itms.username!=undefined)
         session_store.username = itms.username;
+    if (itms.sites!=undefined)
+        session_store.sites = itms.sites;
 });
 
 
 function store_update(d) {
-    session_store = d;
-    chrome.storage.sync.set({'username':d.username});
+    var k;
+    for (k in d)
+        session_store[k] = d[k];
+    chrome.storage.sync.set({
+        'username':session_store.username,
+        'sites':session_store.sites
+    });
 }
 
 
