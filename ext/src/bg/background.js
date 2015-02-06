@@ -13,6 +13,10 @@ chrome.storage.sync.get(['username','sites'], function(itms) {
 
 
 function store_update(d) {
+    if (chrome.extension.inIncognitoContext) {
+        console.log("won't store anything in incognito mode");
+        return;
+    }
     var k;
     for (k in d)
         session_store[k] = d[k];

@@ -17,6 +17,7 @@
     ],
     "persistent": true
   },
+  "incognito": "split",
   "options_page": "src/options/index.html",
   "browser_action": {
     "default_icon": "icons/icon19.png",
