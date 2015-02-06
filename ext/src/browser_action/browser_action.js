@@ -39,6 +39,7 @@ var mpw=null;
 var session_store={};
 
 function recalculate() {
+    $('#thepassword').html('(calculating)');
     $('#usermessage').html("Please wait...");
     if ($('#sitename').val()==null || $('#sitename').val()=="") {
         $('#usermessage').html("need sitename");
@@ -86,15 +87,21 @@ function popup(session_store_) {
     session_store = session_store_;
     if (session_store.username==null || session_store.masterkey==null) {
         $('#main').hide();
+        $('#logoutbtn').hide();
         $('#sessionsetup').show();
+        mpw=null;
         if (session_store.username==null)
             $('#username').focus();
         else {
             $('#username').val(session_store.username);
             window.setTimeout(function(){$('#masterkey').focus();},0.1);
         }
-    } else
+    } else {
         recalc=true;
+        $('#logoutbtn').show();
+        $('#main').show();
+    }
+
     get_active_tab_url().then(function(url){
         var domain = parse_uri(url)['domain'].split("."),
             significant_parts=2;
@@ -125,12 +132,21 @@ $('#sessionsetup > form').on('submit', function(){
     }
     session_store.username=$('#username').val();
     session_store.masterkey=$('#masterkey').val();
+    $('#masterkey').val('');
     chrome.extension.getBackgroundPage().store_update(session_store);
 
     $('#sessionsetup').hide();
+    $('#logoutbtn').show();
     $('#main').show();
     recalculate();
     return false;
+});
+
+$('#logoutbtn').on('click',function(){
+    session_store.masterkey=null;
+    chrome.extension.getBackgroundPage().store_update(session_store);
+    popup(session_store);
+    $('#usermessage').html("session destroyed");
 });
 
 $('#generatepassword').on('click', function(){
