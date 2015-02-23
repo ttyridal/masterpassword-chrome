@@ -35,7 +35,7 @@ function copy_to_clipboard(mimetype, data) {
     document.oncopy=null;
 }
 
-var mpw=null;
+var mpw_session=null;
 var session_store={};
 
 function recalculate() {
@@ -45,24 +45,21 @@ function recalculate() {
         $('#usermessage').html("need sitename");
         return;
     }
-    if (!mpw)
-        mpw = new MPW(
+    if (!mpw_session)
+        mpw_session = mpw(
         session_store.username,
         session_store.masterkey);
 
 
+
     console.log("calc password "+$('#sitename').val()+" . "+parseInt($('#passwdgeneration').val())+" . "+$('#passwdtype').val());
-    mpw.generatePassword($('#sitename').val(), parseInt($('#passwdgeneration').val()), $('#passwdtype').val())
-    .then(function(pass){
-        console.log('Got password');
-        var i,s="";
+    var i,s="",pass=mpw_session($('#sitename').val(), parseInt($('#passwdgeneration').val()), $('#passwdtype').val());
         for (i=0;i<pass.length;i++)s+="&middot;";
 
         $('#thepassword').html(pass);
 
         copy_to_clipboard("text/plain",pass);
         $('#usermessage').html("Password for "+$('#sitename').val()+" copied to clipboard");
-    });
 }
 
 function update_with_settings_for(domain) {
@@ -89,7 +86,7 @@ function popup(session_store_) {
         $('#main').hide();
         $('#logoutbtn').hide();
         $('#sessionsetup').show();
-        mpw=null;
+        mpw_session=null;
         if (session_store.username==null)
             $('#username').focus();
         else {
