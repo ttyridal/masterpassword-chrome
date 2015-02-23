@@ -24,6 +24,9 @@
     "default_title": "MasterPassword",
     "default_popup": "src/browser_action/browser_action.html"
   },
+  "content_scripts": [
+  {"matches":["<all_urls>"], "js": ["src/browser_action/content.js"]}
+  ],
   "permissions": [
     "clipboardWrite",
     "storage",

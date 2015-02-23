@@ -34,6 +34,13 @@ function copy_to_clipboard(mimetype, data) {
     document.execCommand("Copy", false, null);
     document.oncopy=null;
 }
+function update_page_password_input(pass) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {sender: "no.tyridal.masterpassword", password:pass}, function(response) {
+       // response should contain pasted:true on success. don't care currently
+    });
+    });
+}
 
 var mpw_session=null;
 var session_store={};
@@ -59,6 +66,7 @@ function recalculate() {
         $('#thepassword').html(pass);
 
         copy_to_clipboard("text/plain",pass);
+        update_page_password_input(pass);
         $('#usermessage').html("Password for "+$('#sitename').val()+" copied to clipboard");
 }
 
@@ -114,6 +122,7 @@ function popup(session_store_) {
 }
 window.addEventListener('load', function () {
     popup(chrome.extension.getBackgroundPage().session_store);
+
 },false);
 
 $('#sessionsetup > form').on('submit', function(){
