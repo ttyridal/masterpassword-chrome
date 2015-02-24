@@ -1,9 +1,9 @@
 # masterpassword-chrome
 Master Password implemented as a Chrome extension
 
-This is a chrome extension implementing the masterpassword algorithm invented by Maarten Billemont. You can visit his website at [masterpasswordapp.com](http://masterpasswordapp.com). This plugin uses tmthrgd's [mpw library](https://github.com/tmthrgd/mpw-js), a javascript implementation of Maarten's algorithm.
+This is a chrome extension implementing the masterpassword algorithm invented by Maarten Billemont. You can visit his website at [masterpasswordapp.com](http://masterpasswordapp.com). 
 
-**Please note that this plugin is not affiliated with Maarten or tmthrgd**
+**Please note that this plugin is not affiliated with Mr Billemont**
 
 The site settings will sync between your chrome installations if you have chrome sync enabled. (also in incognito)
 
