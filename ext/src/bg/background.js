@@ -1,6 +1,7 @@
 var session_store = {
     'username':null,
     'masterkey':null,
+    'defaulttype':'l',
     'sites':{}
 }
 console.log('background loaded');

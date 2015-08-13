@@ -20,44 +20,80 @@
         -webkit-user-select: none;
         user-select: none;
     }
+    label {
+        margin-left: 2em;
+        margin-right: 1em;
+        color:silver;
+    }
+    label::after { content: ":" }
     button { color: gray;}
-    body { font-size:10pt; padding-top:4px;color:white;}
-    html,body,div { overflow: hidden;}
-    input,select { margin-bottom:0.8em;}
+    body { font-size:10pt; padding-top:4px;color:silver;}
+    input#username, input#masterkey { margin-bottom:0.8em;}
+    select { background: black; -webkit-appearance: none; }
+    select > option { background-color: black; color:white; -webkit-appearance: none; }
+    .highlight {
+       color: white;
+       background-color: rgba(180, 180, 180, 0.05);
+    }
+    .btntool:hover{ border:1px outset silver; }
+    .btntool { width:32px;height:32px;cursor:pointer;background-size:cover;display:inline-block;}
+    .btnconfig { background-image:url(../../icons/wrench.png); }
+    .btnlogout { background-image:url(../../icons/exit.png); }
+    .btnproperties { background-image:url(../../icons/gear.png); }
 	#usermessage {
         text-align:left;
-        position:absolute;bottom:0;
+        position:absolute;bottom:0.1em;
         color:#a0a0a0;
+        height:1em;
+        overflow:hidden;
+        text-overflow: ellipsis;
 	}
+    #main {
+        position:absolute;
+        top:50px;
+        width:100%;
+        bottom:1.1em;
+    }
+
+    a, a:visited, a:hover { color: #a0a0a0; text-decoration: none;}
+    a:hover { text-decoration: underline;}
 </style>
 <body>
 <div id="mainPopup">
     <img src="../../icons/icon48.png" width="48" height="48" style="position:absolute;top:-2px;left:10px">
     <span style="position:relative;">
-    <h1 style="display:inline-block;margin-bottom:0.8em;">MasterPassword</h1>
-    <span style="position:absolute;top:1.8em;right:0;font-size:0.5em;color:silver">chrome&nbsp;ext</span>
+    <h1 style="display:inline-block;margin-bottom:0.8em;color:white">MasterPassword</h1>
+    <span style="position:absolute;top:1.8em;right:0;font-size:0.5em;color:silver">for&nbsp;Chrome</span>
     </span>
 
 
 <div id="sessionsetup" style="display:none">
     <form>
-        <label for="username">Your (full) name<br><input id="username" placeholder="Your Name"/></label><br>
-        <label for="masterkey">Master password<br><input id="masterkey" type="password" placeholder="password" autocomplete="off"/></label><br>
+        <label for="username">Your (full) name</label><br><input id="username" placeholder="Your Name"/><br>
+    <label for="masterkey">Master password</label><br><input id="masterkey" type="password" placeholder="password" autocomplete="off"/><br>
         <input type="submit" value="OK" style="margin-top:1em;padding:0.1em 3em;"/>
     </form>
 </div>
-<div id="logoutbtn" style="display:none;position:absolute;right:1px;top:1px;width:32px;height:32px;;cursor:pointer;background-size:cover;background-image:url(../../icons/exit.png)"></div>
 
-<div id="main" style="position:relative;display:none">
+<div id="main" style="display:none">
+    <div class="btntool btnlogout" style="position:absolute;right:1px;top:-49px;"></div>
     <select id="storedids" size="4" style="display:none;position:absolute;font-size:1.5em;width:99%;z-index:99"></select>
-    <input id="sitename" class="domain" type="text" style="background-color:rgba(60,60,60,0.6);width:100%;text-align:center;font-size:2em;margin-bottom:0;color:white" placeholder="site"/>
-    <button id="storedids_dropdown" style="display:none;position:absolute;height:2em;right:1em;top:1px;z-index:100;background-color:rgba(0,0,0,0)">&#9660;</button>
-    <br>
-<a id="siteconfig_show" href="">[advanced]</a>
-<div id="siteconfig" style="display:none;background-color:rgba(60,60,60,0.6);padding:0.8em 0 0 0;">
-    <form>
-        <input id="domain" class="domain" type="hidden"/><br>
-        <label for="passwdtype">Password type<br><select id="passwdtype">
+    <input id="sitename" class="domain highlight" type="text" style="width:100%;text-align:center;font-size:2em;" placeholder="site"/>
+    <button id="storedids_dropdown" style="display:none;position:absolute;height:2em;right:1em;top:1px;z-index:98;background-color:rgba(0,0,0,0)">&#9660;</button>
+
+    <div style="margin-top:.5em;margin-bottom:.5em">
+    <label for="thepassword">Password</label>
+    <div id="thepassword" style="font-size:2em;margin-top:.1em;">(calculating)</div>
+    </div>
+
+    <div style="margin-top:.2em;margin-bottom:.1em">
+    <input id="loginname" class="highlight" type="text" style="position:relative;width:100%;text-align:center;font-size:1.5em;color:silver" placeholder="[user name]"/>
+    </div>
+
+    <div id="siteconfig_show" class="btntool btnproperties" style="clear:both;margin-top:1em;"></div>
+    <form id="siteconfig" class="highlight" style="display:none;padding:1em 0;">
+        <input id="domain" class="domain" type="hidden"/>
+        <label for="passwdtype">type</label><select id="passwdtype" style="background-color:rgba(0,0,0,0.0);color:white;height:1.5em;">
             <option value="x">Maximum
             <option value="l" selected>Long
             <option value="m">Medium
@@ -66,14 +102,12 @@
             <option value="i">Pin
             <option value="n">Name
             <option value="p">Phrase
-        </select></label><br>
-        <label for="passwdgeneration">password generation<br><input id="passwdgeneration" type="number" min="1" step="1" value="1" style="width:2.5em"/></label><br>
+        </select>
+        <label for="passwdgeneration">generation</label><input id="passwdgeneration" type="number" min="1" step="1" value="1" style="width:2.5em; background-color:rgba(0,0,0,0.0);color:white;height:1.5em;"/>
     </form>
-</div>
 
-<div style="clear:both;margin-top:.5em;">
-    <span style="position:relative;display:inline-block">Password</span>
-    <div id="thepassword" style="font-size:2em;margin-top:.5em;">(calculating)</div></div>
+
+    <div style="position:absolute;bottom:0" id="verify_pass_fld"></div>
 </div>
 
 <div id="usermessage"></div>
