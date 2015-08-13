@@ -15,8 +15,6 @@ Chrome prefers extensions to be installed from the chrome web store. While this 
 # Incognito mode
 Exensions are by default prevented from running in incognito mode. You can allow the masterpassword exension in by visiting the [chrome://extensions/](chrome://extensions/) exension settings and check the box.
 
-Please note that the extension stores the user name and any site settings you do, also in incognito mode
-
 # Changing the site name
 Many sites (like google) have localized url's (google.de, google.co.uk etc). It is recommended that you use the global (ie google.com) as the site name in such cases.
 
