@@ -5,11 +5,13 @@ var session_store = {
     'sites':{}
 }
 console.log('background loaded');
-chrome.storage.sync.get(['username','sites'], function(itms) {
+chrome.storage.sync.get(['username', 'defaulttype', 'sites'], function(itms) {
     if (itms.username!=undefined)
         session_store.username = itms.username;
     if (itms.sites!=undefined)
         session_store.sites = itms.sites;
+    if (itms.defaulttype!=undefined)
+        session_store.defaulttype = itms.defaulttype;
 });
 
 
