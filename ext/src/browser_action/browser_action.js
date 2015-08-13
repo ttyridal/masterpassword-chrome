@@ -253,5 +253,10 @@ $('#siteconfig').on('change', 'select,input', save_site_changes_and_recalc);
 $('#sitename').on('change', save_site_changes_and_recalc);
 $('#loginname').on('change', save_site_changes_and_recalc);
 
+
+$('#mainPopup').on('click','.btnconfig',function(){
+    chrome.tabs.create({'url': 'src/options/index.html'}, function(tab) { });
+});
+
 }());
 

@@ -7,6 +7,6 @@ for sizes in 16 19 48 128; do
 done
 
 sizes=32
-for files in "exit" "gear" "delete"; do
+for files in "exit" "gear" "delete" "wrench"; do
     convert -background transparent ${files}.svg -resize ${sizes}x${sizes} ../ext/icons/${files}.png
 done
