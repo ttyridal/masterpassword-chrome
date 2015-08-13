@@ -10,7 +10,7 @@ The site settings will sync between your chrome installations if you have chrome
 # Installation
 Chrome prefers extensions to be installed from the chrome web store. While this extension is not available there (pending) It has to be installed manually
 * Download the crx file from the releases page and save it somewhere convenient
-* Open the chrome exensions setting [chrome://extensions/](chrome://extensions/) and drag the file over it
+* Open the chrome exensions setting [chrome://extensions/](chrome://extensions/) and drag the file over it. On current versions of chrome you'll have to enable developer mode (tick box upper right corner of the extensions settings)
 
 # Incognito mode
 Exensions are by default prevented from running in incognito mode. You can allow the masterpassword exension in by visiting the [chrome://extensions/](chrome://extensions/) exension settings and check the box.
