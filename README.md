@@ -8,8 +8,10 @@ This is a chrome extension implementing the masterpassword algorithm invented by
 The site settings will sync between your chrome installations if you have chrome sync enabled. (also in incognito)
 
 # Installation
-Chrome prefers extensions to be installed from the chrome web store. While this extension is not available there (pending) It has to be installed manually
-* Download the crx file from the releases page and save it somewhere convenient
+
+Find the extension at in the appstore [here](https://chrome.google.com/webstore/detail/masterpassword-for-chrome/hifbblnjfcimjnlhibannjoclibgedmd?hl=en-US&gl=US)
+
+or download from the [releases page](https://github.com/ttyridal/masterpassword-chrome/releases) and:
 * Open the chrome exensions setting [chrome://extensions/](chrome://extensions/) and drag the file over it. On current versions of chrome you'll have to enable developer mode (tick box upper right corner of the extensions settings)
 
 # Incognito mode
