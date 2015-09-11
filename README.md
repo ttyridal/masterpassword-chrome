@@ -12,10 +12,11 @@ The site settings will sync between your chrome installations if you have chrome
 Find the extension at in the appstore [here](https://chrome.google.com/webstore/detail/masterpassword-for-chrome/hifbblnjfcimjnlhibannjoclibgedmd?hl=en-US&gl=US)
 
 or download from the [releases page](https://github.com/ttyridal/masterpassword-chrome/releases) and:
-* Open the chrome exensions setting [chrome://extensions/](chrome://extensions/) and drag the file over it. On current versions of chrome you'll have to enable developer mode (tick box upper right corner of the extensions settings)
+* Open the chrome exensions setting [chrome://extensions/](chrome://extensions/) and drag the file over it.
+* 
 
 # Incognito mode
-Exensions are by default prevented from running in incognito mode. You can allow the masterpassword exension in by visiting the [chrome://extensions/](chrome://extensions/) exension settings and check the box.
+Exensions are by default prevented from running in incognito mode. You can allow the masterpassword exension in by visiting the [chrome://extensions/](chrome://extensions/) exension settings and check the box. Masterpassword will *not* save site configs when in incognito mode.
 
 # Changing the site name
 Many sites (like google) have localized url's (google.de, google.co.uk etc). It is recommended that you use the global (ie google.com) as the site name in such cases.
