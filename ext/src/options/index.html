@@ -56,7 +56,14 @@ td img { width: 15px; height:15px;}
     <thead><tr><th>sitename<th>(matching)<th>Login<th>count<th>type<th>ver
 <tbody>
 </table>
-<button id="export_mpsites">export</button>
+<button class="export_mpsites">export</button>
+<p id="ver3note" style="display:none">
+Your username contains characters outside the
+plain <a href="https://en.wikipedia.org/wiki/ASCII" target="_blank">ASCII</a> range.<br>
+This browser-plugin implements the third revision of MasterPassword. As a consequence,
+your password list can not be imported in apps supporting max revision 2 (notably the
+official iOS and osX apps with version 2.1.x and earlier)</p>
+
 
 <script src="../../js/jquery-2.1.3.min.js"></script>
 <script src="options.js"></script>

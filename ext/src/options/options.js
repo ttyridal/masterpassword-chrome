@@ -17,9 +17,18 @@
 */
 
 (function(){
+function encode_utf8(s) {
+  return unescape(encodeURIComponent(s));
+}
+function string_is_plain_ascii(s) {
+    return s.length === encode_utf8(s).length;
+}
 
- var stored_sites={};
- var username="";
+ var stored_sites={},
+     username="",
+     key_id,
+     alg_max_version,
+     alg_min_version = 1;
 
 $('#passwdtype').on('change', function() {
     var v = $(this).val();
@@ -32,8 +41,8 @@ function save_sites_to_backend() {
     chrome.storage.sync.set({ 'sites': stored_sites });
 }
 
-function stored_sites_table_append(domain,site,type,loginname,count,ver) {
-    switch(type) {
+function stored_sites_table_append(domain, site, type, loginname, count, ver) {
+    switch(type) {
         case 'x': type="Maximum"; break;
         case 'l': type="Long"; break;
         case 'm': type="Medium"; break;
@@ -42,29 +51,53 @@ function stored_sites_table_append(domain,site,type,loginname,count,ver) {
         case 'i': type="Pin"; break;
         case 'n': type="Name"; break;
         case 'p': type="Phrase"; break;
-        default: throw "Logic error";
+        default: throw new Error("Unknown password type");
     }
     $('#stored_sites').append('<tr><td>'+site+'<td><input class="domainvalue" type="text" data-old="'+
         domain+'" value="'+domain+'"><td>'+loginname+'<td>'+count+'<td>'+type+'<td>'+ver+
         '<td><img class="delete" src="../../icons/delete.png">');
 }
 
+function mpsites_import_error(code, message) {
+    this.name = 'mpsites_import_error';
+    this.message = message || '';
+    this.code = code || 0;
+    this.stack = (new Error()).stack;
+}
+mpsites_import_error.prototype = Object.create(Error.prototype);
+mpsites_import_error.prototype.constructor = mpsites_import_error;
+
 function read_mpsites(d){
-    var ret=[],l,fheader={'format':-1};
+    var ret=[],l,fheader={'format':-1, 'key_id':undefined, 'username':undefined};
     d = d.split("\n");
-    if (!d.shift() == "# Master Password site export") throw "not a mpsites file";
-    while((l = d.shift()) != "##"){}
-    while((l = d.shift()) != "##"){
+    if (d.shift() !== '# Master Password site export')
+        throw new mpsites_import_error(3, "Not a mpsites file");
+
+    while((l = d.shift()) !== '##'){}
+
+    while((l = d.shift()) !== '##'){
         l = l.split(":");
-        if (l[0]=="# Format") fheader.format = 0+$.trim(l[1]);
+        if (l[0] === '# Format') fheader.format = parseInt(l[1].trim(),10);
+        if (l[0] === '# Key ID') fheader.key_id = l[1].trim();
+        if (l[0] === '# User Name') fheader.username = l[1].trim();
     }
-    if (fheader.format != 1) {
+    if (fheader.format !== 1) {
         console.log(fheader);
-        throw "Unsupported mpsites format";
+        throw new mpsites_import_error(1, "Unsupported mpsites format");
     }
+    if (fheader.username && fheader.username !== username) {
+        if (!confirm("Username mismatch!\n\nYou may still import this file, "+
+                "but passwords will be different from where you exported the file"))
+            return undefined;
+    } else if (fheader.key_id && fheader.key_id !== key_id) {
+        if (!confirm("Key ID mismatch!\n\nYou may still import this file, "+
+                "but passwords will be different from where you exported the file"))
+            return undefined;
+    }
+
     $.each(d, function(){
         var s,re = /([-0-9T:Z]+)  +([0-9]+)  +([0-9]+):([0-9]+):([0-9]+)  +([^\t]*)\t *([^\t]*)\t(.*)$/g;
-        if (this.charAt(0)=="#") return true;
+        if (this.charAt(0) === '#') return true;
         s=re.exec(this);
         if (!s) return true;
         switch(s[3]){
@@ -82,8 +115,8 @@ function read_mpsites(d){
             lastused: s[1],
             timesused: s[2],
             passtype: s[3],
-            passalgo: s[4],
-            passcnt: s[5],
+            passalgo: parseInt(s[4],10),
+            passcnt: parseInt(s[5],10),
             loginname: s[6],
             sitename: s[7],
             sitepass: s[8]
@@ -97,13 +130,29 @@ window.addEventListener('load', function() {
     var ss = chrome.extension.getBackgroundPage().session_store;
     stored_sites = ss.sites;
     username = ss.username;
+    key_id = ss.key_id;
+    alg_max_version = ss.max_alg_version;
     $('#passwdtype').val(ss.defaulttype);
+
+    if (!string_is_plain_ascii(username)) {
+        alg_min_version = Math.min(3, alg_max_version);
+        if (alg_min_version > 2)
+            $('#ver3note').show();
+    }
 
     $.each(stored_sites, function(domain,v){
         $.each(v, function(site, settings){
+            var alg_version = alg_min_version;
+            if (alg_min_version < 3 && !string_is_plain_ascii(site))
+                alg_version = 2;
             if (settings.username === undefined)
-                settings.username="";
-            stored_sites_table_append(domain,site,settings.type,settings.username,settings.generation,"3");
+                settings.username = "";
+            stored_sites_table_append(domain,
+                site,
+                settings.type,
+                settings.username,
+                settings.generation,
+                ""+alg_version);
         });
     });
 });
@@ -117,8 +166,9 @@ $('#stored_sites').on('change','.domainvalue',function(e){
     var $t = $(this), domain = $t.attr('data-old'), newdomain = $t.val(), site;
     $t.attr('data-old', newdomain);
     $t=this;
-    do { $t = $t.parentNode;
-    } while($t.nodeName != 'TR');
+    do {
+        $t = $t.parentNode;
+    } while($t.nodeName !== 'TR');
     site=$($t).children('td:eq(0)').text();
 
     if (! (newdomain in stored_sites)) stored_sites[newdomain] = {};
@@ -130,8 +180,8 @@ $('#stored_sites').on('change','.domainvalue',function(e){
 $('#stored_sites').on('click','.delete',function(e){
     var $t, t = this;
     console.log(t);
-    while (t.parentNode.nodeName != 'TR') t=t.parentNode;
-    if (! t.parentNode.nodeName == 'TR') throw "logic error";
+    while (t.parentNode.nodeName !== 'TR') t = t.parentNode;
+    if (t.parentNode.nodeName !== 'TR') throw new Error("logic error - cant find parent node");
     t=t.parentNode;
     $t=$(t);
 
@@ -144,55 +194,102 @@ $(document).on('drop', function(e){
     e.originalEvent.dataTransfer.dropEffect='move';
     e.preventDefault();
     e.stopPropagation();
-    if (e.originalEvent.dataTransfer.files.length!=1) return;
+    if (e.originalEvent.dataTransfer.files.length !== 1) return;
     if (! /.*\.mpsites$/gi.test(e.originalEvent.dataTransfer.files[0].name)) {
         alert("need a .mpsites file");
         return;
     }
     var fr = new FileReader();
     fr.onload=function(x){
-        var x = read_mpsites(x.target.result);
+        var has_ver1_mb_sites = false;
+        try {
+            x = read_mpsites(x.target.result);
+            if (!x) return;
+        } catch (e) {
+            if (e.name === 'mpsites_import_error') {
+                alert(e.message);
+                return;
+            }
+            else throw e;
+        }
         $.each(x, function(){
             var y = this.sitename.split("@");
             if (y.length > 1)
                 this.sitesearch = y[y.length-1];
             else
-                this.sitesearch=this.sitename;
+                this.sitesearch = this.sitename;
 
-            stored_sites_table_append(this.sitesearch,this.sitename,this.passtype,this.loginname,this.passcnt,this.passalgo);
+            stored_sites_table_append(
+                this.sitesearch,
+                this.sitename,
+                this.passtype,
+                this.loginname,
+                this.passcnt,
+                this.passalgo);
+
+            if (this.passalgo < 2 && !string_is_plain_ascii(this.sitename))
+                has_ver1_mb_sites = true;
 
             if (! (this.sitesearch in stored_sites)) stored_sites[this.sitesearch] = {};
             stored_sites[this.sitesearch][this.sitename] = {
-                'generation':this.passcnt,
-                'type':this.passtype,
-                'username':this.loginname
+                'generation': this.passcnt,
+                'type': this.passtype,
+                'username': this.loginname
             };
         });
 
+        if (has_ver1_mb_sites)
+            alert("Version mismatch\n\nYour file contains site names with non ascii characters from "+
+                  "an old masterpassword version. This addon can not reproduce these passwords");
+        else
+            console.debug('Import successful');
+
         save_sites_to_backend();
-    }
+    };
     fr.readAsText(e.originalEvent.dataTransfer.files[0]);
 
 });
 
-$('#export_mpsites').on('click',function(){
-    var x = make_mpsites();
-    start_data_download(x, 'firefox.mpsites');
+$('body').on('click','.export_mpsites',function(){
+    start_data_download(make_mpsites(key_id, stored_sites, alg_min_version, alg_max_version), 'chrome.mpsites');
 });
 
-function make_mpsites() {
+function pad_left(len, s, chr) {
+    chr = chr || ' ';
+    var x, a=[];
+    if (typeof s === 'number')
+        s = ''+s;
+    if (typeof s === 'string') {
+        len -= s.length;
+        if (len <= 0) return s;
+        chr = chr.repeat(len);
+        return [chr, s].join('');
+    }
+    else  {
+        for (x of s) {
+            if (typeof x  === 'number') x = ''+x;
+            len -= x.length;
+            a.push(x);
+        }
+        if (len <= 0) return a.join[''];
+        a.unshift(chr.repeat(len));
+        return a.join('');
+    }
+}
+
+function make_mpsites(key_id, stored_sites, alg_min_version, alg_version) {
     var a=[ '# Master Password site export\n',
         '#     Export of site names and stored passwords (unless device-private) encrypted with the master key.\n',
         '#\n',
         '##\n',
         '# Format: 1\n',
-        '# Date: 2015-03-24T14:44:51Z\n',
+        '# Date: '+ new Date().toISOString().slice(0,-2) +'Z\n',
         '# User Name: '+username+'\n',
         '# Full Name: '+username+'\n',
         '# Avatar: 0\n',
-        '# Key ID:\n',
+        '# Key ID: '+key_id+'\n',
         '# Version: 2.2\n',
-        '# Algorithm: 3\n',
+        '# Algorithm: '+alg_version+'\n',
         '# Default Type: 17\n',
         '# Passwords: PROTECTED\n',
         '##\n',
@@ -202,29 +299,30 @@ function make_mpsites() {
 
     $.each(stored_sites, function(domain,v){
         $.each(v, function(site, settings){
-            var x;
-            var loginname;
+            var typecode,
+                alg_version = alg_min_version;
+
+            if (alg_min_version < 3 && !string_is_plain_ascii(site))
+                alg_version = 2;
+
             switch(settings.type){
-                case 's': x='20'; break;
-                case 'x': x='16'; break;
-                case 'i': x='21'; break;
-                case 'b': x='19'; break;
-                case 'p': x='31'; break;
-                case 'n': x='30'; break;
-                case 'l': x='17'; break;
-                case 'm': x='18'; break;
+                case 's': typecode = '20'; break;
+                case 'x': typecode = '16'; break;
+                case 'i': typecode = '21'; break;
+                case 'b': typecode = '19'; break;
+                case 'p': typecode = '31'; break;
+                case 'n': typecode = '30'; break;
+                case 'l': typecode = '17'; break;
+                case 'm': typecode = '18'; break;
                 default: throw "unknown password type";
             }
-            x+=':3:'+settings.generation;
-            while (x.length<8) x=" "+x;
-            while (site.length<25) site=" "+site;
-            if (settings.username === undefined)
-                loginname=""
-            else
-                loginname = settings.username.substring(0,25);
-            while (loginname.length<25) loginname=" "+loginname;
 
-            a.push('2015-03-23T13:06:35Z         0  '+x+'  '+loginname+'\t'+site+'\t\n');
+            a.push( ['2015-03-23T13:06:35Z',
+                     '  ', pad_left(8, '0'),
+                     '  ', pad_left(8, [typecode, ':', alg_version, ':', settings.generation]),
+                     '  ', pad_left(25, settings.username || ''),
+                     '\t', pad_left(25, site),
+                     '\t\n'].join(''));
         });
     });
     return a;
