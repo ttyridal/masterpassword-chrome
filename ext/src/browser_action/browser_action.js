@@ -24,7 +24,7 @@ function parse_uri(sourceUri){
     uriParts = new RegExp("^(?:([^:/?#.]+):)?(?://)?(([^:/?#]*)(?::(\\d*))?)((/(?:[^?#](?![^?#/]*\\.[^?#/.]+(?:[\\?#]|$)))*/?)?([^?#/]*))?(?:\\?([^#]*))?(?:#(.*))?").exec(sourceUri),
     uri = {};
     for(var i = 0; i < 10; i++)
-        uri[uriPartNames[i]] = (uriParts[i] ? uriParts[i] : "");
+        uri[uriPartNames[i]] = uriParts[i] ? uriParts[i] : "";
     if(uri.directoryPath.length > 0)
         uri.directoryPath = uri.directoryPath.replace(/\/?$/, "/");
     return uri;
@@ -60,13 +60,13 @@ function update_page_password_input(pass) {
     });
 }
 
-var mpw_session=null;
-var session_store={};
+var mpw_session,
+    session_store = {};
 
 function recalculate() {
     $('#thepassword').html('(calculating..)');
     $('#usermessage').html("Please wait...");
-    if ($('#sitename').val() == null || $('#sitename').val() == "") {
+    if (!$('#sitename').val()) {
         $('#usermessage').html("need sitename");
         return;
     }
@@ -88,10 +88,10 @@ function recalculate() {
         }
     }
 
-    console.log("calc password " +
+    console.debug("calc password " +
             $('#sitename').val() +
             " . " +
-            parseInt($('#passwdgeneration').val()) +
+            parseInt($('#passwdgeneration').val(), 10) +
             " . " +
             $('#passwdtype').val());
 
@@ -107,7 +107,7 @@ function recalculate() {
             s += "&middot;";
 
 
-        if ($t.attr('data-visible') == 'true')
+        if ($t.attr('data-visible') === 'true')
             $t.html('<span>' + pass + '</span>');
         else
             $t.html('<a href="" id="showpass">' + s + '</a>');
@@ -122,11 +122,11 @@ function recalculate() {
 function update_with_settings_for(domain) {
     var first = true;
 
-    if (session_store['sites'] === undefined) return;
-    if (session_store.sites[domain] === undefined) return;
+    if (typeof session_store.sites === 'undefined') return;
+    if (typeof session_store.sites[domain] === 'undefined') return;
 
     $('#storedids').empty();
-    $.each(session_store.sites[domain], function(key, val) {
+    $.each(session_store.sites[domain], function(key, val) {
         $('#storedids').append('<option>' + key);
         if (first) {
             $('#sitename').val(key);
@@ -146,7 +146,7 @@ function popup(session_store_) {
     var recalc = false;
 
     session_store = session_store_;
-    if (session_store.username == null || session_store.masterkey == null) {
+    if (!session_store.username || !session_store.masterkey) {
         $('#main').hide();
         $('#sessionsetup').show();
         mpw_session = undefined;
@@ -270,9 +270,9 @@ $('#storedids').on('change', function(){
 function save_site_changes_and_recalc(){
     var domain = $('#domain').val();
 
-    if (session_store['sites'] === undefined)
+    if (typeof session_store.sites === 'undefined')
         session_store.sites = {};
-    if (session_store.sites[domain] === undefined)
+    if (typeof session_store.sites[domain] === 'undefined')
         session_store.sites[domain] = {};
 
     session_store.sites[domain][$('#sitename').val()] = {

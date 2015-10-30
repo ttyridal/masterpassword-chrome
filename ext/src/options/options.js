@@ -236,11 +236,11 @@ function start_data_download(stringarr,filename) {
     a.download = filename;
 
     // Append anchor to body.
-    document.body.appendChild(a)
+    document.body.appendChild(a);
     a.click();
 
     // Remove anchor from body
-    document.body.removeChild(a)
+    document.body.removeChild(a);
 }
 
 }());
