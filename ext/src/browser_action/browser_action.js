@@ -31,14 +31,15 @@ function parse_uri(sourceUri){
 }
 
 function get_active_tab_url() {
-    var ret = jQuery.Deferred();
-    chrome.tabs.query({active:true,windowType:"normal",currentWindow:true}, function(tabres){
-    if (tabres.length!=1) {
-        $('#usermessage').html("Error: bug in tab selector");
-        console.log(tabres);
-        throw "plugin bug";
-    } else
-        ret.resolve(tabres[0].url);
+    var ret = new Promise(function(resolve, fail){
+        chrome.tabs.query({active:true,windowType:"normal",currentWindow:true}, function(tabres){
+        if (tabres.length != 1) {
+            $('#usermessage').html("Error: bug in tab selector");
+            console.log(tabres);
+            throw new Error("plugin bug");
+        } else
+            resolve(tabres[0].url);
+        });
     });
     return ret;
 }
@@ -153,10 +154,11 @@ function popup(session_store_) {
 
     $('#passwdtype').val(session_store.defaulttype);
 
-    get_active_tab_url().then(function(url){
-        var domain = parse_uri(url)['domain'].split("."),
+    get_active_tab_url()
+    .then(function(url){
+        var domain = parse_uri(url).domain.split("."),
             significant_parts = 2;
-        if (domain.length > 2 && domain[domain.length-2].toLowerCase() == "co")
+        if (domain.length > 2 && domain[domain.length-2].toLowerCase() === "co")
             significant_parts = 3;
         while(domain.length > 1 && domain.length > significant_parts)
             domain.shift();
@@ -166,6 +168,9 @@ function popup(session_store_) {
         if(recalc) {
             recalculate();
         }
+    })
+    .catch(function(x) { //jshint ignore:line
+        console.error('get_active_tab_url failed',x);
     });
 }
 window.addEventListener('load', function () {
