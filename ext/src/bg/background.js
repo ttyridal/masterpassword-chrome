@@ -21,16 +21,19 @@ var session_store = {
     'masterkey':null,
     'defaulttype':'l',
     'max_alg_version': 3,
+    'key_id': undefined,
     'sites':{}
 }
 console.log('background loaded');
-chrome.storage.sync.get(['username', 'defaulttype', 'sites'], function(itms) {
+chrome.storage.sync.get(['username', 'defaulttype', 'sites', 'key_id'], function(itms) {
     if (itms.username!=undefined)
         session_store.username = itms.username;
     if (itms.sites!=undefined)
         session_store.sites = itms.sites;
     if (itms.defaulttype!=undefined)
         session_store.defaulttype = itms.defaulttype;
+    if (itms.key_id!=undefined)
+        session_store.key_id = itms.key_id;
 });
 
 
@@ -39,13 +42,16 @@ function store_update(d) {
         console.log("won't store anything in incognito mode");
         return;
     }
-    var k;
-    for (k in d)
-        session_store[k] = d[k];
-    chrome.storage.sync.set({
-        'username':session_store.username,
-        'sites':session_store.sites
-    });
+    var k,
+        syncset = {};
+    for (k in d) {
+        if (d.hasOwnProperty(k) && k !== 'force_update')
+            session_store[k] = d[k];
+    }
+    if (d.username) syncset.username = d.username;
+    if (d.sites) syncset.sites = d.sites;
+    if (d.key_id) syncset.key_id = d.key_id;
+    chrome.storage.sync.set(syncset);
 }
 
 

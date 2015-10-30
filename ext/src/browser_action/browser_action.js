@@ -70,10 +70,22 @@ function recalculate() {
         $('#usermessage').html("need sitename");
         return;
     }
+    var key_id_mismatch = false;
 
     if (!mpw_session) {
         mpw_session = mpw( session_store.username, session_store.masterkey, session_store.max_alg_version );
-        $('#verify_pass_fld').html("Verify: " + mpw_session(".", 0, "n"));
+
+        $('#verify_pass_fld').html("Verify: " + mpw_session.sitepassword(".", 0, "nx"));
+        var key_id = mpw_session.key_id();
+        if (session_store.key_id && key_id !== session_store.key_id) {
+            warn_keyid_not_matching();
+            key_id_mismatch = true;
+            chrome.extension.getBackgroundPage().store_update({username: session_store.username, masterkey: session_store.masterkey});
+        }
+        else {
+            session_store.key_id = key_id;
+            chrome.extension.getBackgroundPage().store_update({username: session_store.username, masterkey: session_store.masterkey, key_id: key_id});
+        }
     }
 
     console.log("calc password " +
@@ -103,7 +115,8 @@ function recalculate() {
 
         copy_to_clipboard("text/plain", pass);
         update_page_password_input(pass);
-        $('#usermessage').html("Password for " + $('#sitename').val() + " copied to clipboard");
+        if (!key_id_mismatch)
+            $('#usermessage').html("Password for " + $('#sitename').val() + " copied to clipboard");
 }
 
 function update_with_settings_for(domain) {
@@ -192,7 +205,6 @@ $('#sessionsetup > form').on('submit', function(){
     session_store.username=$('#username').val();
     session_store.masterkey=$('#masterkey').val();
     $('#masterkey').val('');
-    chrome.extension.getBackgroundPage().store_update(session_store);
 
     $('#sessionsetup').hide();
     $('#main').show();
@@ -202,7 +214,7 @@ $('#sessionsetup > form').on('submit', function(){
 
 $('#mainPopup').on('click','.btnlogout',function(){
     session_store.masterkey = null;
-    chrome.extension.getBackgroundPage().store_update(session_store);
+    chrome.extension.getBackgroundPage().store_update({masterkey: null});
     popup(session_store);
     $('#usermessage').html("session destroyed");
 });
@@ -263,10 +275,16 @@ function save_site_changes_and_recalc(){
         type:$('#passwdtype').val(),
         username:$('#loginname').val()
     };
-    chrome.extension.getBackgroundPage().store_update(session_store);
+    chrome.extension.getBackgroundPage().store_update({sites: session_store.sites});
     if (Object.keys(session_store.sites[domain]).length>1)
         $('#storedids_dropdown').show();
     recalculate();
+}
+
+function warn_keyid_not_matching()
+{
+    console.debug("keyids did not match!");
+    $('#usermessage').html("<span style='color:red'>Master password possible mismatch!</span> <button id='change_keyid_ok' title='set as new'>OK</button>");
 }
 
 $('#siteconfig').on('change', 'select,input', save_site_changes_and_recalc);
@@ -278,5 +296,14 @@ $('#mainPopup').on('click','.btnconfig',function(){
     chrome.tabs.create({'url': 'src/options/index.html'}, function(tab) { });
 });
 
-}());
+$('#mainPopup').on('click','#change_keyid_ok',function(){
+    chrome.extension.getBackgroundPage().store_update({
+        username: session_store.username,
+        masterkey: session_store.masterkey,
+        key_id: mpw_session.key_id(),
+        force_update: true
+    });
+    $('#usermessage').html("Password for " + $('#sitename').val() + " copied to clipboard");
+});
 
+}());
