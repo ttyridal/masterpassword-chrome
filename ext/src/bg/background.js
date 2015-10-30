@@ -20,6 +20,7 @@ var session_store = {
     'username':null,
     'masterkey':null,
     'defaulttype':'l',
+    'max_alg_version': 3,
     'sites':{}
 }
 console.log('background loaded');

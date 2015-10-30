@@ -71,9 +71,7 @@ function recalculate() {
     }
 
     if (!mpw_session) {
-        mpw_session = mpw(
-        session_store.username,
-        session_store.masterkey);
+        mpw_session = mpw( session_store.username, session_store.masterkey, session_store.max_alg_version );
         $('#verify_pass_fld').html("Verify: " + mpw_session(".", 0, "n"));
     }
 
@@ -87,9 +85,9 @@ function recalculate() {
     var i,
         s = "",
         $t = $('#thepassword'),
-        pass = mpw_session(
+        pass = mpw_session.sitepassword(
                 $('#sitename').val(),
-                parseInt($('#passwdgeneration').val()),
+                parseInt($('#passwdgeneration').val(), 10),
                 $('#passwdtype').val());
 
         for (i = 0; i < pass.length; i++)
@@ -137,8 +135,8 @@ function popup(session_store_) {
     if (session_store.username == null || session_store.masterkey == null) {
         $('#main').hide();
         $('#sessionsetup').show();
-        mpw_session = null;
-        if (session_store.username == null)
+        mpw_session = undefined;
+        if (!session_store.username)
             window.setTimeout(
                     function(){$('#username').focus();},
                     0.1);
