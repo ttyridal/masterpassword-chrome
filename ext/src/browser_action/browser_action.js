@@ -214,9 +214,14 @@ $('#sessionsetup > form').on('submit', function(){
 
 $('#mainPopup').on('click','.btnlogout',function(){
     session_store.masterkey = null;
+    $('#burgermenu').toggle();
     chrome.extension.getBackgroundPage().store_update({masterkey: null});
     popup(session_store);
     $('#usermessage').html("session destroyed");
+});
+
+$('#mainPopup').on('click','.btnburger',function(){
+    $('#burgermenu').toggle();
 });
 
 $('#generatepassword').on('click', function(){});
@@ -293,6 +298,7 @@ $('#loginname').on('change', save_site_changes_and_recalc);
 
 
 $('#mainPopup').on('click','.btnconfig',function(){
+    $('#burgermenu').toggle();
     chrome.tabs.create({'url': 'src/options/index.html'}, function(tab) { });
 });
 
