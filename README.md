@@ -25,6 +25,18 @@ When you first open masterpassword on a localized domain, that domain will be su
 
 If you have several accounts at a domain, it is suggested to prefix the site name with something like "username@" (ie myself@google.com). The site name in masterpassword will change to a dropdown if you have multiple variants.
 
+# Algorithm versions and compatibility
+The MasterPassword algorithm have gone through several revisions as bugs and unfortunate design descisions have
+been discovered. This addon implements v3 of the algorithm. You should have no problem interoperating with other
+apps using the same version. Additionally you will get the same passwords for apps using the v2, as long as your master user name only contains [ascii](https://en.wikipedia.org/wiki/ASCII) letters, numbers and symbols. In particular that means you should avoid non english/latin characters like æ,ø,å,ß,€ and similar in your name, if you need to mix v2 and v3.
 
-## About Master Password
-The Master Password algorithm was made up by Maarten Billemont and is documented on his website http://www.masterpasswordapp.com. This is an unofficial implementation of his algorithm. I am in no way affiliated with aforementioned website. 
+
+# Differences on name and phrase type passwords
+`version >= 2.0`
+
+There was a descrepancy between how MasterPassword for Firefox and other implementations handled
+passwords with the type *name* and *phrase*. This has been corrected in versions after 2.0rc2. To get the old
+behaviour select the *name (v)* or *phrase (v)* option.
+
+Specifically, versions prior to 2.0rc2 forced the *variant* for such types to be respectively *login* or *answer*.
+The variant concept is not commonly available in other implementations.
