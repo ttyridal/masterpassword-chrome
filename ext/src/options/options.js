@@ -30,10 +30,9 @@ function string_is_plain_ascii(s) {
      alg_max_version,
      alg_min_version = 1;
 
-$('#passwdtype').on('change', function() {
-    var v = $(this).val();
-    chrome.storage.sync.set({ 'defaulttype': v });
-    chrome.extension.getBackgroundPage().session_store.defaulttype = v;
+document.querySelector('#passwdtype').addEventListener('change', function() {
+    chrome.storage.sync.set({ 'defaulttype': this.value });
+    chrome.extension.getBackgroundPage().session_store.defaulttype = this.value;
 });
 
 function save_sites_to_backend() {
@@ -41,38 +40,32 @@ function save_sites_to_backend() {
     chrome.storage.sync.set({ 'sites': stored_sites });
 }
 
-function stored_sites_table_append(domain, site, type, loginname, count, ver) {
+function passtype_to_str(type) {
     switch(type) {
-        case 'x': type="Maximum"; break;
-        case 'l': type="Long"; break;
-        case 'm': type="Medium"; break;
-        case 'b': type="Basic"; break;
-        case 's': type="Short"; break;
-        case 'i': type="Pin"; break;
-        case 'n': type="Name"; break;
-        case 'p': type="Phrase"; break;
+        case 'x': return "Maximum";
+        case 'l': return "Long";
+        case 'm': return "Medium";
+        case 'b': return "Basic";
+        case 's': return "Short";
+        case 'i': return "Pin";
+        case 'n': return "Name";
+        case 'p': return "Phrase";
         default: throw new Error("Unknown password type");
     }
-    $('#stored_sites').append('<tr><td>'+site+'<td><input class="domainvalue" type="text" data-old="'+
-        domain+'" value="'+domain+'"><td>'+loginname+'<td>'+count+'<td>'+type+'<td>'+ver+
-        '<td><img class="delete" src="../../icons/delete.png">');
 }
 
-window.addEventListener('load', function() {
-    var ss = chrome.extension.getBackgroundPage().session_store;
-    stored_sites = ss.sites;
-    username = ss.username;
-    key_id = ss.key_id;
-    alg_max_version = ss.max_alg_version;
-    $('#passwdtype').val(ss.defaulttype);
+function stored_sites_table_append(domain, site, type, loginname, count, ver) {
+    type = passtype_to_str(type);
+    let tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+site+'<td><input class="domainvalue" type="text" data-old="'+
+        domain+'" value="'+domain+'"><td>'+loginname+'<td>'+count+'<td>'+type+'<td>'+ver+
+        '<td><img class="delete" src="delete.png">';
 
-    if (!string_is_plain_ascii(username)) {
-        alg_min_version = Math.min(3, alg_max_version);
-        if (alg_min_version > 2)
-            $('#ver3note').show();
-    }
+    document.querySelector('#stored_sites > tbody').appendChild(tr);
+}
 
-
+function stored_sites_table_update(stored_sites) {
+    document.querySelector('#stored_sites > tbody').innerHTML = '';
     Object.keys(stored_sites).forEach(function(domain){
         Object.keys(stored_sites[domain]).forEach(function(site){
             let settings = stored_sites[domain][site],
@@ -90,47 +83,123 @@ window.addEventListener('load', function() {
                 ""+alg_version);
         });
     });
+}
+
+window.addEventListener('load', function() {
+    var ss = chrome.extension.getBackgroundPage().session_store;
+    stored_sites = ss.sites;
+    username = ss.username;
+    key_id = ss.key_id;
+    alg_max_version = ss.max_alg_version;
+    document.querySelector('#passwdtype').value = ss.defaulttype;
+
+    if (!string_is_plain_ascii(username)) {
+        alg_min_version = Math.min(3, alg_max_version);
+        if (alg_min_version > 2) {
+            document.querySelector('#ver3note').style.display = 'inherit';
+        }
+    }
+
+    stored_sites_table_update(stored_sites);
 });
 
-$(document).on('dragover dragenter', function(e){
+function dragover_enter(e){
     e.preventDefault();
     e.stopPropagation();
-});
+}
+document.addEventListener('dragover', dragover_enter);
+document.addEventListener('dragenter', dragover_enter);
 
-$('#stored_sites').on('change','.domainvalue',function(e){
-    var $t = $(this), domain = $t.attr('data-old'), newdomain = $t.val(), site;
-    $t.attr('data-old', newdomain);
-    $t=this;
-    do {
-        $t = $t.parentNode;
-    } while($t.nodeName !== 'TR');
-    site=$($t).children('td:eq(0)').text();
+function find_parent(name, node) {
+    if (!node) throw new Error("node argument required");
+    if (!node.parentNode) throw new Error("node has no parent");
+    node = node.parentNode;
+    while(node.nodeName !== name) {
+        if (!node.parentNode) throw new Error("No parent node found matching " + name);
+        node = node.parentNode;
+    }
+    return node;
+}
+
+document.querySelector('#stored_sites').addEventListener('change', function(e) {
+    if (!e.target.classList.contains('domainvalue')) return;
+    let t = find_parent('TR', e.target),
+        domain = e.target.getAttribute('data-old'),
+        newdomain = e.target.value,
+        site = t.querySelector('td:nth-child(1)').textContent;
 
     if (! (newdomain in stored_sites)) stored_sites[newdomain] = {};
     stored_sites[newdomain][site] = stored_sites[domain][site];
     delete stored_sites[domain][site];
     save_sites_to_backend();
+    console.debug('Change',t,domain,newdomain);
+    e.target.setAttribute('data-old', newdomain);
 });
 
-$('#stored_sites').on('click','.delete',function(e){
-    var $t, t = this;
-    console.log(t);
-    while (t.parentNode.nodeName !== 'TR') t = t.parentNode;
-    if (t.parentNode.nodeName !== 'TR') throw new Error("logic error - cant find parent node");
-    t=t.parentNode;
-    $t=$(t);
+document.querySelector('#stored_sites').addEventListener('click', function(e) {
+    if (!e.target.classList.contains('delete')) return;
+    let t = find_parent('TR', e.target);
 
-    delete stored_sites[$t.find('td:eq(1) > input').val()][$t.children('td:eq(0)').text()];
-    $(t).remove();
+    let sitesearch = t.querySelector('td:nth-child(2) > input').value,
+        sitename = t.querySelector('td:nth-child(1)').textContent;
+
+    delete stored_sites[sitesearch][sitename];
+    t.parentNode.removeChild(t);
     save_sites_to_backend();
 });
 
-$(document).on('drop', function(e){
-    e.originalEvent.dataTransfer.dropEffect='move';
+
+function get_sitesearch(sitename) {
+    let y = sitename.split("@");
+    if (y.length > 1)
+        return y[y.length-1];
+    else
+        return sitename;
+}
+
+function resolveConflict(site) {
+    return new Promise(function(resolve, reject){
+        var div = document.createElement('div');
+        div.style.cssText = "position:fixed;width:100%;height:100%;top:0;left:0;background:rgba(0,0,0,0.7);z-index:500";
+        div.innerHTML = [
+            '<div style="border:2px black inset;position:fixed;top:5em;left:5em;width:50%;background:white;padding: 1em"><h2>Conflicting ',
+            site.sitename,
+            ' (<small>',site.sitesearch,'</small>)',
+            '</h2><h3>existing</h3>',
+            'type: ', passtype_to_str(stored_sites[site.sitesearch][site.sitename].type),
+            ' count: ', stored_sites[site.sitesearch][site.sitename].generation,
+            ' username: ', stored_sites[site.sitesearch][site.sitename].username,
+            '<h3>importing</h3>',
+            'type: ', passtype_to_str(site.passtype),
+            ' count: ', site.passcnt,
+            ' username: ', site.loginname,
+            '<div style="padding-top:1em"><button id="existing">Keep existing</button> <button id="imported">Replace with imported</button></div>',
+            '</div>'].join('');
+        div.addEventListener('click', function(ev){
+            switch (ev.target.id) {
+                case 'existing':
+                    resolve(stored_sites[site.sitesearch][site.sitename]);
+                    break;
+                case 'imported':
+                    resolve({'generation': site.passcnt, 'type': site.passtype, 'username': site.loginname});
+                    break;
+                default:
+                    return;
+
+            }
+            div.parentNode.removeChild(div);
+        });
+        document.querySelector('body').appendChild(div);
+    });
+}
+
+document.addEventListener('drop', function(e) {
+    let dt = e.dataTransfer;
+    dt.dropEffect='move';
     e.preventDefault();
     e.stopPropagation();
-    if (e.originalEvent.dataTransfer.files.length !== 1) return;
-    if (! /.*\.mpsites$/gi.test(e.originalEvent.dataTransfer.files[0].name)) {
+    if (dt.files.length !== 1) return;
+    if (! /.*\.mpsites$/gi.test(dt.files[0].name)) {
         alert("need a .mpsites file");
         return;
     }
@@ -148,46 +217,68 @@ $(document).on('drop', function(e){
             else throw e;
         }
 
-        for (let site of x) {
-            let y = site.sitename.split("@");
-            if (y.length > 1)
-                site.sitesearch = y[y.length-1];
+        var done = new Promise(function(all_done){
+            function popsite() {
+                if (! x.length) return false;
+
+                var p, site = x.shift();
+
+                site.sitesearch = get_sitesearch(site.sitename);
+                if (site.passalgo < 2 && !string_is_plain_ascii(site.sitename))
+                    has_ver1_mb_sites = true;
+
+                if (! (site.sitesearch in stored_sites)) stored_sites[site.sitesearch] = {};
+                if (site.sitename in stored_sites[site.sitesearch] &&
+                    (stored_sites[site.sitesearch][site.sitename].generation !== site.passcnt ||
+                        stored_sites[site.sitesearch][site.sitename].type !== site.passtype ||
+                        stored_sites[site.sitesearch][site.sitename].username !== site.loginname)) {
+
+                    p = resolveConflict(site);
+                } else {
+                    p = Promise.resolve({'generation': site.passcnt, 'type': site.passtype, 'username': site.loginname}, undefined);
+                }
+
+                p.then(function(cfg, nextanswer){
+                    stored_sites[site.sitesearch][site.sitename] = cfg;
+                    if (!popsite())
+                        all_done();
+                })
+                .catch(function(reason){
+                    console.error("popsite failed", reason);
+                });
+
+                return true;
+            }
+
+            if (!popsite())
+                all_done();
+        });
+
+
+        done.then(function(){
+            stored_sites_table_update(stored_sites);
+
+            if (has_ver1_mb_sites)
+                alert("Version mismatch\n\nYour file contains site names with non ascii characters from "+
+                      "an old masterpassword version. This addon can not reproduce these passwords");
             else
-                site.sitesearch = site.sitename;
+                console.debug('Import successful');
 
-            stored_sites_table_append(
-                site.sitesearch,
-                site.sitename,
-                site.passtype,
-                site.loginname,
-                site.passcnt,
-                site.passalgo);
+            save_sites_to_backend();
+        })
+        .catch(function(err){
+            console.error(err);
+        });
 
-            if (site.passalgo < 2 && !string_is_plain_ascii(site.sitename))
-                has_ver1_mb_sites = true;
-
-            if (! (site.sitesearch in stored_sites)) stored_sites[site.sitesearch] = {};
-            stored_sites[site.sitesearch][site.sitename] = {
-                'generation': site.passcnt,
-                'type': site.passtype,
-                'username': site.loginname
-            };
-        }
-
-        if (has_ver1_mb_sites)
-            alert("Version mismatch\n\nYour file contains site names with non ascii characters from "+
-                  "an old masterpassword version. This addon can not reproduce these passwords");
-        else
-            console.debug('Import successful');
-
-        save_sites_to_backend();
     };
-    fr.readAsText(e.originalEvent.dataTransfer.files[0]);
+    fr.readAsText(dt.files[0]);
 
 });
 
-$('body').on('click','.export_mpsites',function(){
-    start_data_download(window.mpw_utils.make_mpsites(key_id, username, stored_sites, alg_min_version, alg_max_version), 'chrome.mpsites');
+document.querySelector('body').addEventListener('click', function(ev){
+    if (ev.target.classList.contains('export_mpsites')) {
+        start_data_download(window.mpw_utils.make_mpsites(key_id, username, stored_sites, alg_min_version, alg_max_version), 'chrome.mpsites');
+    }
 });
 
 function start_data_download(stringarr,filename) {
