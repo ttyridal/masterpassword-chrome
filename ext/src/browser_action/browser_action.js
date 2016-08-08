@@ -17,6 +17,7 @@
 */
 
 (function () {
+    "use strict";
 
 function parse_uri(sourceUri){
     // stolen with pride: http://blog.stevenlevithan.com/archives/parseuri-split-url
@@ -67,6 +68,7 @@ function recalculate() {
     $('#thepassword').html('(calculating..)');
     $('#usermessage').html("Please wait...");
     if (!$('#sitename').val()) {
+        $('#thepassword').html('(need a sitename!)');
         $('#usermessage').html("need sitename");
         return;
     }
@@ -120,26 +122,30 @@ function recalculate() {
 }
 
 function update_with_settings_for(domain) {
-    var first = true;
+    var keys, site;
 
-    if (typeof session_store.sites === 'undefined') return;
-    if (typeof session_store.sites[domain] === 'undefined') return;
+    if (typeof session_store.sites === 'undefined' ||
+        typeof session_store.sites[domain] === 'undefined') {
+        keys = [];
+    } else {
+        keys = Object.keys(session_store.sites[domain]);
+        site = session_store.sites[domain][keys[0]];
+    }
 
-    $('#storedids').empty();
-    $.each(session_store.sites[domain], function(key, val) {
-        $('#storedids').append('<option>' + key);
-        if (first) {
-            $('#sitename').val(key);
-            $('#passwdgeneration').val(val.generation);
-            $('#passwdtype').val(val.type);
-            if (val.username)
-                $('#loginname').val(val.username);
-            else
-                $('#loginname').val("");
-            first = false;
-        } else
-            $('#storedids_dropdown').show();
-    });
+    if (keys.length>1)
+        $('#storedids_dropdown').show();
+    else if (keys.length === 0) {
+        keys[0] = domain;
+        site = { generation: 1,
+                 username: '',
+                 type: session_store.defaulttype
+        };
+    }
+
+    $('#sitename').val(keys[0]);
+    $('#passwdgeneration').val(site.generation);
+    $('#passwdtype').val(site.type);
+    $('#loginname').val(site.username ? site.username : "");
 }
 
 function popup(session_store_) {
@@ -164,8 +170,6 @@ function popup(session_store_) {
         recalc = true;
         $('#main').show();
     }
-
-    $('#passwdtype').val(session_store.defaulttype);
 
     get_active_tab_url()
     .then(function(url){
@@ -240,11 +244,16 @@ $('#thepassword').on('click', '#showpass', function(e){
 });
 
 $('#storedids_dropdown').on('click', function(e){
-    var sids = $('#storedids');
+    var sids = $('#storedids'),
+        domain = $('#domain').val();
 
     if (sids.is(":visible"))
         sids.hide();
     else {
+        sids.empty();
+        $.each(session_store.sites[domain], function(key, val) {
+            sids.append('<option>' + key);
+        });
         sids.show();
         sids.focus();
     }
