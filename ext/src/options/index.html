@@ -47,6 +47,16 @@ td img { width: 15px; height:15px;}
             <option value="nx">Name [V]
             <option value="px">Phrase [V]
         </select>
+        <dt><label for="passwdtimeout">Remember password</label><dd>
+            <select id="passwdtimeout">
+            <option value="0">Never
+            <option value="5">5 minutes
+            <option value="15">15 minutes
+            <option value="30">30 minutes
+            <option value="60">1 hour
+            <option value="480">8 hours
+            <option value="-1" selected>Until closed
+        </select>
     </dl>
 
 
@@ -65,6 +75,7 @@ your password list can not be imported in apps supporting max revision 2 (notabl
 official iOS and osX apps with version 2.1.x and earlier)</p>
 
 
+<script src="globaloptions.js"></script>
 <script src="mpw-utils.js"></script>
 <script src="options.js"></script>
 </body>

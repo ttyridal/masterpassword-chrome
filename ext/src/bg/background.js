@@ -21,44 +21,65 @@ var session_store = {
     'masterkey':null,
     'defaulttype':'l',
     'max_alg_version': 3,
+    'passwdtimeout': -1,
     'key_id': undefined,
     'sites':{}
 }
-console.log('background loaded');
-chrome.storage.sync.get(['username', 'defaulttype', 'sites', 'key_id'], function(itms) {
+
+var passwdtimer;
+
+chrome.storage.sync.get(['username', 'defaulttype', 'sites', 'key_id', 'passwdtimeout'], function(itms) {
     if (itms.username!=undefined)
         session_store.username = itms.username;
     if (itms.sites!=undefined)
         session_store.sites = itms.sites;
     if (itms.defaulttype!=undefined)
         session_store.defaulttype = itms.defaulttype;
+    if (itms.passwdtimeout!=undefined)
+        session_store.passwdtimeout = itms.passwdtimeout;
     if (itms.key_id!=undefined)
         session_store.key_id = itms.key_id;
 });
 
 
 function store_update(d) {
-    if (chrome.extension.inIncognitoContext) {
-        console.log("won't store anything in incognito mode");
-        return;
-    }
-    var k,
-        syncset = {};
-    for (k in d) {
-        if (d.hasOwnProperty(k) && k !== 'force_update')
-            session_store[k] = d[k];
-    }
-    if (d.username) syncset.username = d.username;
-    if (d.sites) syncset.sites = d.sites;
-    if (d.key_id) syncset.key_id = d.key_id;
+    let syncset = {};
+
+    Object.keys(d).forEach(function(k){
+        switch(k) {
+            case 'passwdtimeout':
+                if (passwdtimer !== undefined) {
+                    window.clearTimeout(passwdtimer);
+                    passwdtimer = undefined;
+                }
+            case 'defaulttype':
+                syncset[k] = session_store[k] = d[k];
+                break;
+
+            case 'username':
+            case 'key_id':
+            case 'sites':
+                if (!chrome.extension.inIncognitoContext)
+                    syncset[k] = session_store[k] = d[k];
+                break;
+            case 'masterkey':
+                if (!chrome.extension.inIncognitoContext)
+                    session_store[k] = d[k];
+                break;
+            default:
+                break;
+        }
+    });
     chrome.storage.sync.set(syncset);
+
+    if (session_store.passwdtimeout === 0)
+        session_store.masterkey = null;
+    else if (session_store.passwdtimeout > 0) {
+        if (passwdtimer !== undefined)
+            window.clearTimeout(passwdtimer);
+        window.passwdtimer = window.setTimeout(function(){
+            console.log("auto-logout");
+            session_store.masterkey = null;
+        }, session_store.passwdtimeout * 1000 * 60);
+    }
 }
-
-
-
-//example of using a message handler from the inject scripts
-chrome.extension.onMessage.addListener(
-  function(request, sender, sendResponse) {
-  	chrome.pageAction.show(sender.tab.id);
-    sendResponse();
-  });

@@ -30,11 +30,6 @@ function string_is_plain_ascii(s) {
      alg_max_version,
      alg_min_version = 1;
 
-document.querySelector('#passwdtype').addEventListener('change', function() {
-    chrome.storage.sync.set({ 'defaulttype': this.value });
-    chrome.extension.getBackgroundPage().session_store.defaulttype = this.value;
-});
-
 function save_sites_to_backend() {
     console.log('save sites', stored_sites);
     chrome.storage.sync.set({ 'sites': stored_sites });
@@ -91,7 +86,6 @@ window.addEventListener('load', function() {
     username = ss.username;
     key_id = ss.key_id;
     alg_max_version = ss.max_alg_version;
-    document.querySelector('#passwdtype').value = ss.defaulttype;
 
     if (!string_is_plain_ascii(username)) {
         alg_min_version = Math.min(3, alg_max_version);
