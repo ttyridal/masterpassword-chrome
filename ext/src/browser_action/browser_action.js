@@ -46,11 +46,11 @@ let ui = {
         if (typeof el === 'string')
             el = document.querySelector(el);
         el = el.style;
-        el.display = (el.display === 'none' ? '' : 'none');
+        el.display = el.display === 'none' ? '' : 'none';
         return el.display === '';
     },
 
-    user_warn: function(s) {
+    user_warn: function(s) {
         let e = document.querySelector('#usermessage');
         e.className = 'warning_message';
         e.textContent = s;
@@ -107,7 +107,7 @@ let ui = {
         document.querySelector('#verify_pass_fld').textContent = s;
     }
 
-}
+};
 
 function get_active_tab_url() {
     var ret = new Promise(function(resolve, fail){
