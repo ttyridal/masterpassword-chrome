@@ -239,6 +239,8 @@ function popup(session_store_) {
     } else {
         recalc = true;
         ui.show('#main');
+        ui.show('#config');
+        ui.show('#siteconfig');
     }
 
     get_active_tab_url()
@@ -288,6 +290,8 @@ document.querySelector('#sessionsetup > form').addEventListener('submit', functi
 
         ui.hide('#sessionsetup');
         ui.show('#main');
+        ui.show('#config');
+        ui.show('#siteconfig');
         recalculate();
     }
 });
@@ -352,18 +356,14 @@ document.querySelector('#thepassword').addEventListener('click', function(ev) {
 
 document.querySelector('#mainPopup').addEventListener('click', function(ev) {
     if (ev.target.classList.contains('btnconfig')) {
-        ui.hide('#burgermenu');
         chrome.tabs.create({'url': 'src/options/index.html'}, function(tab) { });
     }
     else if (ev.target.classList.contains('btnlogout')) {
         session_store.masterkey = null;
-        ui.hide('#burgermenu');
+        ui.hide('#config');
         chrome.extension.getBackgroundPage().store_update({masterkey: null});
         popup(session_store);
         ui.user_info("session destroyed");
-    }
-    else if (ev.target.classList.contains('btnburger')) {
-        ui.toggle('#burgermenu');
     }
     else if (ev.target.id === 'change_keyid_ok') {
         chrome.extension.getBackgroundPage().store_update({
@@ -373,10 +373,6 @@ document.querySelector('#mainPopup').addEventListener('click', function(ev) {
             force_update: true
         });
         ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
-    }
-    else if (ev.target.id === 'siteconfig_show') {
-        ui.hide(ev.target);
-        ui.show('#siteconfig');
     }
 });
 

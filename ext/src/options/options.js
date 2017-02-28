@@ -54,7 +54,7 @@ function stored_sites_table_append(domain, site, type, loginname, count, ver) {
     let tr = document.createElement('tr');
     tr.innerHTML = '<td>'+site+'<td><input class="domainvalue" type="text" data-old="'+
         domain+'" value="'+domain+'"><td>'+loginname+'<td>'+count+'<td>'+type+'<td>'+ver+
-        '<td><img class="delete" src="../../icons/delete.png">';
+        '<td><div class="fa fa-times-circle delete" aria-hidden="true"></i>';
 
     document.querySelector('#stored_sites > tbody').appendChild(tr);
 }
