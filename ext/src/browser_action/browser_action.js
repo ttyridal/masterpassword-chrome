@@ -15,6 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with the software.  If not, see <http://www.gnu.org/licenses/>.
 */
+/*jshint browser:true, devel:true */
+/* globals chrome, mpw */
+/* jshint esversion: 6 */
 
 (function () {
     "use strict";
@@ -112,7 +115,7 @@ let ui = {
 function get_active_tab_url() {
     var ret = new Promise(function(resolve, fail){
         chrome.tabs.query({active:true,windowType:"normal",currentWindow:true}, function(tabres){
-        if (tabres.length != 1) {
+        if (tabres.length !== 1) {
             ui.user_warn("Error: bug in tab selector");
             console.log(tabres);
             throw new Error("plugin bug");
@@ -270,7 +273,17 @@ function popup(session_store_) {
 }
 
 window.addEventListener('load', function () {
-    popup(chrome.extension.getBackgroundPage().session_store);
+    chrome.extension.getBackgroundPage().store_get(
+            ['sites', 'username', 'masterkey', 'key_id', 'max_alg_version', 'defaulttype', 'pass_to_clipboard'])
+    .then(data => {
+        //document.getElementById('pwgw_fail_msg').style.display = data.pwgw_failure ? 'inherit' : 'none';
+        popup(data);
+    })
+    .catch(err => {
+        console.error(err);
+        console.error("Failed loading state from background on popup");
+        ui.user_warn("BUG. please check log and report");
+    });
 },false);
 
 document.querySelector('#sessionsetup > form').addEventListener('submit', function(ev) {

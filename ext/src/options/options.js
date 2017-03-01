@@ -15,6 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with the software.  If not, see <http://www.gnu.org/licenses/>.
 */
+/*jshint browser:true, esversion: 6 */
+/* globals chrome */
 
 (function(){
 function encode_utf8(s) {
@@ -31,8 +33,8 @@ function string_is_plain_ascii(s) {
      alg_min_version = 1;
 
 function save_sites_to_backend() {
-    console.log('save sites', stored_sites);
-    chrome.storage.sync.set({ 'sites': stored_sites });
+    chrome.extension.getBackgroundPage().store_update({sites: stored_sites});
+
 }
 
 function passtype_to_str(type) {
@@ -81,20 +83,25 @@ function stored_sites_table_update(stored_sites) {
 }
 
 window.addEventListener('load', function() {
-    var ss = chrome.extension.getBackgroundPage().session_store;
-    stored_sites = ss.sites;
-    username = ss.username;
-    key_id = ss.key_id;
-    alg_max_version = ss.max_alg_version;
+    chrome.extension.getBackgroundPage().store_get(['sites', 'username', 'max_alg_version', 'key_id'])
+    .then(data => {
+        stored_sites = data.sites;
+        username = data.username;
+        key_id = data.key_id;
+        alg_max_version = data.max_alg_version;
 
-    if (!string_is_plain_ascii(username)) {
-        alg_min_version = Math.min(3, alg_max_version);
-        if (alg_min_version > 2) {
-            document.querySelector('#ver3note').style.display = 'inherit';
+        if (!string_is_plain_ascii(username)) {
+            alg_min_version = Math.min(3, alg_max_version);
+            if (alg_min_version > 2) {
+                document.querySelector('#ver3note').style.display = 'inherit';
+            }
         }
-    }
 
-    stored_sites_table_update(stored_sites);
+        stored_sites_table_update(stored_sites);
+    })
+    .catch(() => {
+        console.error("Failed loading state from background on popup");
+    });
 });
 
 function dragover_enter(e){

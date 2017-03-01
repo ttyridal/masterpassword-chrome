@@ -7,7 +7,9 @@ document.querySelector('#passwdtimeout').addEventListener('change', function() {
 });
 
 window.addEventListener('load', function() {
-    var ss = chrome.extension.getBackgroundPage().session_store;
-    document.querySelector('#passwdtype').value = ss.defaulttype;
-    document.querySelector('#passwdtimeout').value = ss.passwdtimeout;
+    chrome.extension.getBackgroundPage().store_get(['defaulttype','passwdtimeout'])
+    .then(data => {
+        document.querySelector('#passwdtype').value = data.defaulttype;
+        document.querySelector('#passwdtimeout').value = data.passwdtimeout;
+    });
 });
