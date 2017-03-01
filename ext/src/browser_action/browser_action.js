@@ -241,7 +241,6 @@ function popup(session_store_) {
         recalc = true;
         ui.show('#main');
         ui.show('#config');
-        ui.show('#siteconfig');
     }
 
     get_active_tab_url()
@@ -292,7 +291,6 @@ document.querySelector('#sessionsetup > form').addEventListener('submit', functi
         ui.hide('#sessionsetup');
         ui.show('#main');
         ui.show('#config');
-        ui.show('#siteconfig');
         recalculate();
     }
 });
@@ -349,7 +347,9 @@ document.querySelector('#main').addEventListener('change', function(ev){
 
 document.querySelector('#thepassword').addEventListener('click', function(ev) {
     let t = ev.target.parentNode;
-    t.textContent = t.getAttribute('data-pass');
+    let dp = t.getAttribute('data-pass');
+    if (dp != null)
+        t.textContent = dp;
     t.setAttribute('data-visible', 'true');
     ev.preventDefault();
     ev.stopPropagation();
@@ -364,7 +364,7 @@ document.querySelector('#mainPopup').addEventListener('click', function(ev) {
         ui.hide('#config');
         chrome.extension.getBackgroundPage().store_update({masterkey: null});
         popup(session_store);
-        ui.user_info("session destroyed");
+        ui.user_info("Session destroyed");
     }
     else if (ev.target.id === 'change_keyid_ok') {
         chrome.extension.getBackgroundPage().store_update({
@@ -374,6 +374,16 @@ document.querySelector('#mainPopup').addEventListener('click', function(ev) {
             force_update: true
         });
         ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
+    }
+});
+
+document.querySelector('#main').addEventListener('click', function(ev) {
+    if (ev.target.id === 'siteconfig_show') {
+        var v = document.getElementById('siteconfig');
+        if (v.style.display === 'none')
+            v.style.display = 'block';
+        else
+            v.style.display = 'none';
     }
 });
 
