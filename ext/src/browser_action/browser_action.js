@@ -145,11 +145,6 @@ var mpw_session,
 function recalculate() {
     ui.thepassword("(calculating..)");
     ui.user_info("Please wait...");
-    if (!ui.sitename()) {
-        ui.thepassword("(need a sitename!)");
-        ui.user_info("need sitename");
-        return;
-    }
     var key_id_mismatch = false;
 
     if (!mpw_session) {
@@ -167,6 +162,13 @@ function recalculate() {
             session_store.key_id = key_id;
             chrome.extension.getBackgroundPage().store_update({username: session_store.username, masterkey: session_store.masterkey, key_id: key_id});
         }
+    }
+
+    if (!ui.sitename()) {
+        ui.thepassword("(need a sitename!)");
+        if (!key_id_mismatch)
+            ui.user_info("need sitename");
+        return;
     }
 
     let siteconfig = ui.siteconfig();
@@ -196,7 +198,7 @@ function recalculate() {
 function update_with_settings_for(domain) {
     var keys, site;
 
-    if (typeof session_store.sites === 'undefined' ||
+    if (typeof session_store.sites === 'undefined' || domain === '' ||
         typeof session_store.sites[domain] === 'undefined') {
         keys = [];
     } else {
@@ -314,7 +316,8 @@ function save_site_changes(){
 
     session_store.sites[domain][ui.sitename()] = ui.siteconfig();
 
-    chrome.extension.getBackgroundPage().store_update({sites: session_store.sites});
+    if (domain !== '')
+        chrome.extension.getBackgroundPage().store_update({sites: session_store.sites});
     if (Object.keys(session_store.sites[domain]).length>1)
         ui.show('#storedids_dropdown');
 }
@@ -344,8 +347,11 @@ document.querySelector('#main').addEventListener('change', function(ev){
 
 document.querySelector('#thepassword').addEventListener('click', function(ev) {
     let t = ev.target.parentNode;
-    t.textContent = t.getAttribute('data-pass');
-    t.setAttribute('data-visible', 'true');
+    let nt = t.getAttribute('data-pass');
+    if (nt) {
+        t.textContent = nt;
+        t.setAttribute('data-visible', 'true');
+    }
     ev.preventDefault();
     ev.stopPropagation();
 });
