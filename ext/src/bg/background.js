@@ -143,4 +143,18 @@ function store_get(keys) {
 window.store_update = store_update;
 window.store_get = store_get;
 
+Promise.all([new Promise((r,f) => {chrome.management.getSelf(res=>{r(res);})}), promised_storage_get(['releasenote_version'])])
+.then(c => {
+    if (c[0].version !== c[1].releasenote_version) {
+        chrome.tabs.create({
+            url: "/src/options/releasenote.html"
+          });
+        chrome.storage.sync.set({releasenote_version: c[0].version});
+    }
+})
+.catch(e => {
+    console.info(e);
+});
+
+// console.log("background.js loaded");
 }());
