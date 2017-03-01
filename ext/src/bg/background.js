@@ -23,6 +23,7 @@ var session_store = {
     'max_alg_version': 3,
     'passwdtimeout': -1,
     'key_id': undefined,
+    'pass_to_clipboard': true,
     'sites':{}
 }
 

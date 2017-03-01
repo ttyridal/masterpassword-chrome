@@ -189,10 +189,15 @@ function recalculate() {
 
         ui.thepassword(Array(pass.length+1).join('&middot;'), pass);
 
-        copy_to_clipboard("text/plain", pass);
+        if (session_store.pass_to_clipboard)
+            copy_to_clipboard("text/plain", pass);
         update_page_password_input(pass);
-        if (!key_id_mismatch)
-            ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
+        if (!key_id_mismatch) {
+            if (session_store.pass_to_clipboard)
+                ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
+            else
+                ui.user_info("Password for " + ui.sitename() + " ready");
+        }
 }
 
 function update_with_settings_for(domain) {
@@ -378,7 +383,7 @@ document.querySelector('#mainPopup').addEventListener('click', function(ev) {
             key_id: mpw_session.key_id(),
             force_update: true
         });
-        ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
+        ui.user_info("ready");
     }
     else if (ev.target.id === 'siteconfig_show') {
         ui.hide(ev.target);
