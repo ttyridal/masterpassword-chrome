@@ -1,5 +1,6 @@
 /* Copyright Torbjorn Tyridal 2015
-
+   Copyright Sami Vänttinen 2017 (version 2.0.3 modifications)
+   
     This file is part of Masterpassword for Chrome (herby known as "the software").
 
     The software is free software: you can redistribute it and/or modify

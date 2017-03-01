@@ -55,6 +55,12 @@ table {
   background-color: #373d47;
 }
 
+.bannericon {
+  float: left;
+  margin-top: 2px;
+  margin-right: 4px;
+}
+
 .w3-cell {
   vertical-align: middle;
   font-size: 22px;
