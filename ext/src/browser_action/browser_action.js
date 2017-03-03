@@ -16,6 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with the software.  If not, see <http://www.gnu.org/licenses/>.
 */
+/*jshint browser:true, devel:true */
+/* globals chrome, mpw */
+/* jshint esversion: 6 */
 
 (function () {
     "use strict";
@@ -100,7 +103,7 @@ let ui = {
             e = e.appendChild(document.createElement('a'));
             e.href = '';
             e.id = 'showpass';
-            e.innerHTML = visible;
+            e.textContent = visible;
         }
     },
 
@@ -113,7 +116,7 @@ let ui = {
 function get_active_tab_url() {
     var ret = new Promise(function(resolve, fail){
         chrome.tabs.query({active:true,windowType:"normal",currentWindow:true}, function(tabres){
-        if (tabres.length != 1) {
+        if (tabres.length !== 1) {
             ui.user_warn("Error: bug in tab selector");
             console.log(tabres);
             throw new Error("plugin bug");
@@ -146,11 +149,6 @@ var mpw_session,
 function recalculate() {
     ui.thepassword("(calculating..)");
     ui.user_info("Please wait...");
-    if (!ui.sitename()) {
-        ui.thepassword("(need a sitename!)");
-        ui.user_info("need sitename");
-        return;
-    }
     var key_id_mismatch = false;
 
     if (!mpw_session) {
@@ -170,6 +168,13 @@ function recalculate() {
         }
     }
 
+    if (!ui.sitename()) {
+        ui.thepassword("(need a sitename!)");
+        if (!key_id_mismatch)
+            ui.user_info("need sitename");
+        return;
+    }
+
     let siteconfig = ui.siteconfig();
     siteconfig.generation = parseInt(siteconfig.generation, 10);
 
@@ -186,18 +191,23 @@ function recalculate() {
                 siteconfig.generation,
                 siteconfig.type);
 
-        ui.thepassword(Array(pass.length+1).join('&middot;'), pass);
+        ui.thepassword(Array(pass.length+1).join("\u00B7"), pass); // &middot;
 
-        copy_to_clipboard("text/plain", pass);
+        if (session_store.pass_to_clipboard)
+            copy_to_clipboard("text/plain", pass);
         update_page_password_input(pass);
-        if (!key_id_mismatch)
-            ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
+        if (!key_id_mismatch) {
+            if (session_store.pass_to_clipboard)
+                ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
+            else
+                ui.user_info("Password for " + ui.sitename() + " ready");
+        }
 }
 
 function update_with_settings_for(domain) {
     var keys, site;
 
-    if (typeof session_store.sites === 'undefined' ||
+    if (typeof session_store.sites === 'undefined' || domain === '' ||
         typeof session_store.sites[domain] === 'undefined') {
         keys = [];
     } else {
@@ -267,7 +277,17 @@ function popup(session_store_) {
 }
 
 window.addEventListener('load', function () {
-    popup(chrome.extension.getBackgroundPage().session_store);
+    chrome.extension.getBackgroundPage().store_get(
+            ['sites', 'username', 'masterkey', 'key_id', 'max_alg_version', 'defaulttype', 'pass_to_clipboard'])
+    .then(data => {
+        //document.getElementById('pwgw_fail_msg').style.display = data.pwgw_failure ? 'inherit' : 'none';
+        popup(data);
+    })
+    .catch(err => {
+        console.error(err);
+        console.error("Failed loading state from background on popup");
+        ui.user_warn("BUG. please check log and report");
+    });
 },false);
 
 document.querySelector('#sessionsetup > form').addEventListener('submit', function(ev) {
@@ -338,7 +358,8 @@ function save_site_changes(){
 
     session_store.sites[domain][ui.sitename()] = ui.siteconfig();
 
-    chrome.extension.getBackgroundPage().store_update({sites: session_store.sites});
+    if (domain !== '')
+        chrome.extension.getBackgroundPage().store_update({sites: session_store.sites});
     if (Object.keys(session_store.sites[domain]).length>1)
         ui.show('#storedids_dropdown');
 }
@@ -361,9 +382,10 @@ document.querySelector('#main').addEventListener('change', function(ev){
 document.querySelector('#thepassword').addEventListener('click', function(ev) {
     let t = ev.target.parentNode;
     let dp = t.getAttribute('data-pass');
-    if (dp != null)
+    if (dp != null) {
         t.textContent = dp;
-    t.setAttribute('data-visible', 'true');
+        t.setAttribute('data-visible', 'true');
+    }
     ev.preventDefault();
     ev.stopPropagation();
 });
@@ -380,13 +402,14 @@ document.querySelector('body').addEventListener('click', function(ev) {
         ui.user_info("Session destroyed");
     }
     else if (ev.target.id === 'change_keyid_ok') {
+        session_store.key_id = mpw_session.key_id();
         chrome.extension.getBackgroundPage().store_update({
             username: session_store.username,
             masterkey: session_store.masterkey,
-            key_id: mpw_session.key_id(),
+            key_id: session_store.key_id,
             force_update: true
         });
-        ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
+        ui.user_info("ready");
     }
 });
 
