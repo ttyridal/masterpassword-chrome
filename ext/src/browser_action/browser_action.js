@@ -239,13 +239,11 @@ function popup(session_store_) {
         mpw_session = undefined;
         if (!session_store.username)
             window.setTimeout(function(){
-                ui.user_info("");
                 document.querySelector('#username').focus();
             }, 15);
         else {
             document.querySelector('#username').value = session_store.username;
             window.setTimeout(function(){
-                ui.user_info("");
                 document.querySelector('#masterkey').focus();
             }, 15);
         }
@@ -280,7 +278,16 @@ window.addEventListener('load', function () {
     chrome.extension.getBackgroundPage().store_get(
             ['sites', 'username', 'masterkey', 'key_id', 'max_alg_version', 'defaulttype', 'pass_to_clipboard'])
     .then(data => {
-        //document.getElementById('pwgw_fail_msg').style.display = data.pwgw_failure ? 'inherit' : 'none';
+        if (data.pwgw_failure) {
+            let e = ui.user_warn("System password vault failed! ");
+            e = e.appendChild(document.createElement('a'));
+            e.href = "https://github.com/ttyridal/masterpassword-firefox/wiki/Key-vault-troubleshooting";
+            e.target = "_blank";
+            e.textContent = "Help?";
+            data.masterkey=undefined;
+//         document.getElementById('pwgw_fail_msg').style.display = data.pwgw_failure ? 'inherit' : 'none';
+        } else
+            ui.user_info("");
         popup(data);
     })
     .catch(err => {

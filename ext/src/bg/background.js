@@ -63,7 +63,7 @@ function pwvault_gateway(msg) {
 var settings = {
     'defaulttype': 'l',
     'passwdtimeout': -1,
-    'pass_store': 'n',
+    'pass_store': false,
     'pass_to_clipboard': true,
     'max_alg_version': 3
 };
@@ -95,6 +95,9 @@ function store_update(d) {
         else if (d.passwdtimeout === -1)
             chrome.alarms.clear(pw_retention_timer);
     }
+    if (d.pass_store !== undefined) {
+        settings.pass_store = !(d.pass_store === false || d.pass_store === 'n')
+    }
 
     Object.keys(d).forEach(k => {
         switch (k) {
@@ -112,7 +115,7 @@ function store_update(d) {
                     syncset[k] = d[k];
                 break;
             case 'masterkey':
-                if (settings.pass_store !== 'n') {
+                if (settings.pass_store) {
                     if (d.key_id || d.force_update)
                         Promise.resolve(pwvault_gateway({'type':'pwset','name':'default', 'value': d[k]}))
                         .catch(e => { console.error(e); });
@@ -144,6 +147,7 @@ function store_get(keys) {
     return Promise.all([p1])
     .then(v => {
         let [webext] = v;
+        webext['pass_store'] = (webext['pass_store'] === 'y' || webext['pass_store'] === true);
         for (let k of setting_keys)
             settings[k] = webext[k] !== undefined ? webext[k] : settings[k];
         if (settings.passwdtimeout === 0) // clear now in case it's recently changed
