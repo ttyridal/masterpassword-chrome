@@ -16,6 +16,28 @@ html{
   background-color: #21252b;
 }
 
+main {
+    display: block;
+    max-width: 38em;
+    padding: 0 1em;
+    line-height: 1.2em;
+}
+
+main p {
+    margin-bottom: 1em;
+}
+
+main a, main a:link {
+    font-style: italic;
+    text-decoration: underline;
+}
+
+main h3 {
+    margin-bottom:0.2em;
+    font-size: 1.2em;
+    color: #ddd;
+}
+
 a:visited,
 a:hover,
 a:link,
