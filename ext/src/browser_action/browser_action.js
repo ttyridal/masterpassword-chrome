@@ -390,6 +390,13 @@ document.querySelector('#thepassword').addEventListener('click', function(ev) {
     ev.stopPropagation();
 });
 
+document.querySelector('#copypass').addEventListener('click', function(ev) {
+   let pass = document.querySelector('#thepassword').getAttribute('data-pass');
+   copy_to_clipboard("text/plain", pass);
+   if (pass && pass !== '')
+        ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
+});
+
 document.querySelector('body').addEventListener('click', function(ev) {
     if (ev.target.classList.contains('btnconfig')) {
         chrome.tabs.create({'url': 'src/options/index.html'}, function(tab) { });
