@@ -1,5 +1,6 @@
 /* Copyright Torbjorn Tyridal 2015
-
+   Copyright Sami Vänttinen 2017 (version 2.0.3 modifications)
+   
     This file is part of Masterpassword for Chrome (herby known as "the software").
 
     The software is free software: you can redistribute it and/or modify
@@ -239,6 +240,7 @@ function popup(session_store_) {
     } else {
         recalc = true;
         ui.show('#main');
+        ui.show('#config');
     }
 
     get_active_tab_url()
@@ -288,6 +290,7 @@ document.querySelector('#sessionsetup > form').addEventListener('submit', functi
 
         ui.hide('#sessionsetup');
         ui.show('#main');
+        ui.show('#config');
         recalculate();
     }
 });
@@ -344,7 +347,9 @@ document.querySelector('#main').addEventListener('change', function(ev){
 
 document.querySelector('#thepassword').addEventListener('click', function(ev) {
     let t = ev.target.parentNode;
-    t.textContent = t.getAttribute('data-pass');
+    let dp = t.getAttribute('data-pass');
+    if (dp != null)
+        t.textContent = dp;
     t.setAttribute('data-visible', 'true');
     ev.preventDefault();
     ev.stopPropagation();
@@ -352,18 +357,14 @@ document.querySelector('#thepassword').addEventListener('click', function(ev) {
 
 document.querySelector('#mainPopup').addEventListener('click', function(ev) {
     if (ev.target.classList.contains('btnconfig')) {
-        ui.hide('#burgermenu');
         chrome.tabs.create({'url': 'src/options/index.html'}, function(tab) { });
     }
     else if (ev.target.classList.contains('btnlogout')) {
         session_store.masterkey = null;
-        ui.hide('#burgermenu');
+        ui.hide('#config');
         chrome.extension.getBackgroundPage().store_update({masterkey: null});
         popup(session_store);
-        ui.user_info("session destroyed");
-    }
-    else if (ev.target.classList.contains('btnburger')) {
-        ui.toggle('#burgermenu');
+        ui.user_info("Session destroyed");
     }
     else if (ev.target.id === 'change_keyid_ok') {
         chrome.extension.getBackgroundPage().store_update({
@@ -374,9 +375,15 @@ document.querySelector('#mainPopup').addEventListener('click', function(ev) {
         });
         ui.user_info("Password for " + ui.sitename() + " copied to clipboard");
     }
-    else if (ev.target.id === 'siteconfig_show') {
-        ui.hide(ev.target);
-        ui.show('#siteconfig');
+});
+
+document.querySelector('#main').addEventListener('click', function(ev) {
+    if (ev.target.id === 'siteconfig_show') {
+        var v = document.getElementById('siteconfig');
+        if (v.style.display === 'none')
+            v.style.display = 'block';
+        else
+            v.style.display = 'none';
     }
 });
 
