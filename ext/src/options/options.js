@@ -273,6 +273,22 @@ document.querySelector('body').addEventListener('click', function(ev){
     if (ev.target.classList.contains('export_mpsites')) {
         start_data_download(window.mpw_utils.make_mpsites(key_id, username, stored_sites, alg_min_version, alg_max_version), 'chrome.mpsites');
     }
+    if (ev.target.classList.contains('accordion_toggle')) {
+        let d = ev.target.parentNode;
+        let is_in = d.classList.contains('in');
+        let new_height = d.querySelector('div').offsetHeight + d.offsetHeight + 20;
+        console.log(is_in, d.offsetHeight, d.style.height, new_height);
+        if (is_in)
+            d.style.height = '';
+        else
+            d.style.height = new_height + 'px';
+        d.classList.toggle('in');
+        function reset_height() {
+            d.style.height = '';
+            d.removeEventListener('transitionend', reset_height);
+        }
+        d.addEventListener('transitionend', reset_height);
+    }
 });
 
 function start_data_download(stringarr,filename) {

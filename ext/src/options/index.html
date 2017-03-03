@@ -24,26 +24,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="../css/mpwd.css" rel="stylesheet" />
-<link href="../css/w3.css" rel="stylesheet" />
 <link href="../css/font-awesome.min.css" rel="stylesheet"/>
 </head>
-<body class="w3-container">
-    <div class="w3-content w3-cell-row w3-padding-0" style="width: 800px;">
-        <div class="w3-cell w3-content w3-cell-left">
-            <img src="../../icons/icon48.png">
-        </div>
-        <div class="w3-cell w3-content w3-cell-right w3-left-align">
-           <h1>MasterPassword config</h1>
-        </div>
-    </div>
+<body>
+    <header class="banner valign_mid container">
+        <div class="valign_mid"><img src="../../icons/icon48.png"><h1>MasterPassword config</h1></div>
+    </header>
 
-    <div class="w3-container w3-card-4 maincard">
-        <h2>Global settings</h2>
-        <div class="form-group-options">
-            <div class="leftArea">
+
+    <div class="container accordion">
+        <h2 class="accordion_toggle">Global settings</h2>
+        <div>
+            <div class="configitem">
                 <label class="w3-label w3-small w3-text-white" for="passwdtype">Default password type:</label>
-            </div>
-            <div class="rightArea">
                  <select class="w3-select w3-small w3-border" id="passwdtype">
                     <option value="x">Maximum
                     <option value="l" selected>Long
@@ -57,13 +50,8 @@
                     <option value="px">Phrase [V]
                 </select>
             </div>
-        </div>
-
-        <div class="form-group-options">
-            <div class="leftArea">
+            <div class="configitem">
                 <label class="w3-label w3-small w3-text-white" for="passwdtimeout">Remember password:</label>
-            </div>
-            <div class="rightArea">
                 <select class="w3-select w3-small w3-border" id="passwdtimeout">
                     <option value="0">Never
                     <option value="5">5 minutes
@@ -77,20 +65,22 @@
         </div>
     </div>
 
-    <div class="w3-container w3-card-4 maincard">
-        <h2>Stored sites</h2>
-        <p class="w3-small">(You can drag-drop a .mpsites file here to import it)</p>
-        <table class="w3-table w3-small w3-centered" id="stored_sites">
-            <thead><tr><th>sitename<th>(matching)<th>Login<th>count<th>type<th>ver
-        <tbody>
-        </table>
-        <button class="w3-small export_mpsites">export</button>
-        <p class="w3-small" id="ver3note" style="display:none">
-        Your username contains characters outside the
-        plain <a href="https://en.wikipedia.org/wiki/ASCII" target="_blank">ASCII</a> range.<br>
-        This browser-plugin implements the third revision of MasterPassword. As a consequence,
-        your password list can not be imported in apps supporting max revision 2 (notably the
-        official iOS and osX apps with version 2.1.x and earlier)</p>
+    <div class="container accordion">
+        <h2 class="accordion_toggle">Stored sites</h2>
+        <div>
+            <p class="">(You can drag-drop a .mpsites file here to import it)</p>
+            <table class="" id="stored_sites">
+                <thead><tr><th>sitename<th>(matching)<th>Login<th>count<th>type<th>ver
+            <tbody>
+            </table>
+            <button class="export_mpsites">export</button>
+            <p class="" id="ver3note" style="display:none">
+            Your username contains characters outside the
+            plain <a href="https://en.wikipedia.org/wiki/ASCII" target="_blank">ASCII</a> range.<br>
+            This browser-plugin implements the third revision of MasterPassword. As a consequence,
+            your password list can not be imported in apps supporting max revision 2 (notably the
+            official iOS and osX apps with version 2.1.x and earlier)</p>
+        </div>
     </div>
 
 <script src="globaloptions.js"></script>

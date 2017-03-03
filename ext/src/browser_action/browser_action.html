@@ -24,110 +24,77 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="../css/mpwd.css" rel="stylesheet" />
-<link href="../css/w3.css" rel="stylesheet" />
+<link href="../css/mpwd_popup.css" rel="stylesheet" />
 <link href="../css/font-awesome.min.css" rel="stylesheet"/>
 </head>
 <body>
+    <header class="banner valign_mid container">
+        <div class="valign_mid"><img src="../../icons/icon48.png"><h1>MasterPassword</h1></div>
 
-<div id="mainPopup">
+        <div class="spacer"></div>
+    </header>
 
-    <div class="w3-content w3-cell-row w3-padding-0 banner">
-        <div class="w3-cell w3-container w3-cell-left">
-            <div class="bannericon"><img src="../../icons/icon32.png"></div><div class="w3-cell-left bannerText">MasterPassword</div>
-        </div>
-        <div class="w3-cell w3-container w3-cell-right w3-right-align">
-            <div class="configbuttons" id="config" style="display: none;">
-                <div class="fa fa-cog fa-2 btntool btnconfig"></div>&nbsp;
-                <div class="fa fa-sign-out fa-2 btntool btnlogout"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="sessionsetup" class="form-group w3-container" style="display: none">
-        <form>
-        <div class="form-group">
-            <label class="w3-label w3-small w3-text-white" for="username">Your (full) name</label>
-            <input class="w3-input w3-small w3-border-0" id="username" placeholder="Your Name"/>
-        </div>
-
-        <div class="form-group">
-        	<label class="w3-label w3-small w3-text-white" for="masterkey">Master password</label>
-        	<input class="w3-input w3-small w3-border-0" id="masterkey" type="password" placeholder="password" autocomplete="off"/>
-        </div>
-
-        <div class="form-group">
-            <button class="w3-small" type="submit">OK</button>
-        </div>
+    <div id="sessionsetup" class="container" style="display: none">
+        <form><label for="username" class="text-big">Your (full) name:</label>
+        <input id="username" type="text" placeholder="[name]"/>
+        <input id="masterkey" type="password" placeholder="[password]" autocomplete="off"/>
+        <input type="submit" value="OK"/>
         </form>
     </div>
+    <input autofocus="true" style="width:0;height:0;line-height:0;border:0;bottom:-10px;right:-10px;position:fixed" class="stealfocus"/>
 
-    <div id="main" class="w3-container w3-padding-8" style="display: none">
-        <select class="w3-select w3-small w3-border" id="storedids" size="4" style="display: none;"></select>
+    <div id="main" class="container" style="display: none">
+        <div class="configbuttons" id="config">
+            <div class="fa fa-cog fa-2 btntool btnconfig"></div>
+            <div class="fa fa-sign-out fa-2 btntool btnlogout"></div>
+        </div>
 
-        <div class="w3-cell-row">
-            <div class="w3-cell w3-padding-0">
-                <input id="sitename" class="w3-input w3-border-0" type="text" placeholder="site"/>
+        <input id="domain" class="domain" type="hidden"/>
+        <div class="content valign_mid">
+            <div class="dropdown" style="flex:1">
+                <input id="sitename" class="dropdown" type="text" placeholder="site"/>
+                <ul id="storedids" style="display:none"></ul>
             </div>
-            <div class="w3-cell w3-right-align w3-padding-0">
-                <button class="w3-small" id="storedids_dropdown" style="display: none;"><i class="fa fa-chevron-down fa-2" aria-hidden="true"></i></button>
-            </div>
+            <button id="storedids_dropdown" style="display: none;"><i class="fa fa-chevron-down fa-2" aria-hidden="true"></i></button>
         </div>
 
-        <div class="w3-content w3-padding-8">
-    	    <label class="w3-label w3-small w3-text-white" for="thepassword">Password</label>
-    	    <div class="w3-content w3-small w3-padding-0" id="thepassword">(calculating)</div>
+        <div class="content line-heigh valign_mid" id="passwd">
+            <div class="line-heigh" id="thepassword">(calculating)</div>
+            <div class="spacer"></div>
+            <div class="text-bigger"><div class="fa fa-copy fa-2 btntool btncopy"></div></div>
         </div>
 
-        <div class="w3-content">
-        	<input id="loginname" class="w3-input w3-border w3-small" type="text" placeholder="[user name]"/>
+        <div class="content">
+            <input id="loginname" class="w3-input w3-border-0 w3-small" type="text" placeholder="[user name]"/>
         </div>
 
-        <div class="w3-padding-8">
-            <div class="form-group">
-                <div class="addOptLeft">
-                    <button class="w3-small"><i class="fa fa-sliders" id="siteconfig_show" aria-hidden="true"></i></button>
-                </div>
-                <div class="addOptRight">
-                    <form id="siteconfig" style="display: none;">
-                    <input id="domain" class="domain" type="hidden"/>
-                    <table class="addTable">
-                        <tr>
-                            <th>
-                                <label class="w3-label w3-small w3-text-white thinText" for="passwdtype">Type: </label>
-                            </th>
-                            <th>
-                                <select class="w3-select w3-small w3-border thinText" id="passwdtype">
-                                    <option value="x">Maximum
-                                    <option value="l" selected>Long
-                                    <option value="m">Medium
-                                    <option value="b">Basic
-                                    <option value="s">Short
-                                    <option value="i">Pin
-                                    <option value="n">Name
-                                    <option value="p">Phrase
-                                    <option value="nx">Name [v]
-                                    <option value="px">Phrase [v]
-                                </select>
-                            </th>
-                    
-                            <th>
-                                <label class="w3-label w3-small w3-text-white thinText" for="passwdgeneration">Generation: </label>
-                            </th>
-                            <th>
-                                <input class="w3-input w3-small w3-border thinText" id="passwdgeneration" type="number" min="1" step="1" value="1"/>
-                            </th>
-                        </tr>
-                    </table>
-                    </form>
-                </div>
+        <div class="container content">
+            <div class="text-bigger" id="siteconfig_show"><div class="fa fa-sliders fa-2 btntool btnprops"></div></div>
+            <div id="siteconfig" style="display:none">
+                <label for="passwdtype">Type: </label>
+                <select id="passwdtype">
+                    <option value="x">Maximum
+                    <option value="l" selected>Long
+                    <option value="m">Medium
+                    <option value="b">Basic
+                    <option value="s">Short
+                    <option value="i">Pin
+                    <option value="n">Name
+                    <option value="p">Phrase
+                    <option value="nx">Name [v]
+                    <option value="px">Phrase [v]
+                </select>
+                <div class="spacer-fixed-small"></div>
+                <label for="passwdgeneration">Generation: </label>
+                <input id="passwdgeneration" type="number" min="1" step="1" value="1"/>
             </div>
         </div>
 
-        <div class="w3-content verify_pass" id="verify_pass_fld"></div>
+        <div class="content verify_pass" id="verify_pass_fld"></div>
     </div>
 
-    <div class="w3-content w3-dark-grey w3-tiny" id="usermessage"></div>
-</div>
+    <div class="container content" id="usermessage">loading...</div>
+
 
 <script src="../../js/scrypt-asm.js"></script>
 <script src="mpw.js"></script>

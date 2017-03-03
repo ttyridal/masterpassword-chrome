@@ -1,6 +1,6 @@
 /* Copyright Torbjorn Tyridal 2015
    Copyright Sami Vänttinen 2017 (version 2.0.3 modifications)
-   
+
     This file is part of Masterpassword for Chrome (herby known as "the software").
 
     The software is free software: you can redistribute it and/or modify
@@ -229,13 +229,15 @@ function popup(session_store_) {
         mpw_session = undefined;
         if (!session_store.username)
             window.setTimeout(function(){
+                ui.user_info("");
                 document.querySelector('#username').focus();
-            }, 0.1);
+            }, 15);
         else {
             document.querySelector('#username').value = session_store.username;
             window.setTimeout(function(){
+                ui.user_info("");
                 document.querySelector('#masterkey').focus();
-            }, 0.1);
+            }, 15);
         }
     } else {
         recalc = true;
@@ -301,11 +303,30 @@ document.querySelector('#storedids_dropdown').addEventListener('click', function
     if (ui.toggle(sids)) {
         sids.innerHTML = '';
         Object.keys(session_store.sites[ui.domain()]).forEach(function(site){
-            sids.appendChild(document.createElement('option')).textContent = site;
+            sids.appendChild(document.createElement('li')).textContent = site;
         });
+        ui.show(sids);
         sids.focus();
     }
 });
+
+document.querySelector('#storedids').addEventListener('click', function(ev) {
+    let site = ev.target.textContent,
+        val = session_store.sites[ui.domain()][site];
+    ui.sitename(site);
+    ui.siteconfig(val.type, val.generation, val.username || '');
+    ui.hide(ev.target.parentNode);
+    ev.target.parentNode.blur();
+    window.setTimeout(recalculate, 1);
+});
+
+document.querySelector('#storedids').addEventListener('blur', e=>{
+    window.setTimeout(()=>{
+        ui.hide(document.querySelector('#storedids'));
+    },1);
+});
+
+
 
 function save_site_changes(){
     let domain = ui.domain();
@@ -333,15 +354,7 @@ function warn_keyid_not_matching()
 }
 
 document.querySelector('#main').addEventListener('change', function(ev){
-    if (ev.target.id === 'storedids') {
-        let site = ev.target.value,
-            val = session_store.sites[ui.domain()][site];
-
-        ui.sitename(site);
-        ui.siteconfig(val.type, val.generation, val.username || '');
-        ui.hide(ev.target);
-    } else
-        save_site_changes();
+    save_site_changes();
     recalculate();
 });
 
@@ -355,7 +368,7 @@ document.querySelector('#thepassword').addEventListener('click', function(ev) {
     ev.stopPropagation();
 });
 
-document.querySelector('#mainPopup').addEventListener('click', function(ev) {
+document.querySelector('body').addEventListener('click', function(ev) {
     if (ev.target.classList.contains('btnconfig')) {
         chrome.tabs.create({'url': 'src/options/index.html'}, function(tab) { });
     }
@@ -377,14 +390,17 @@ document.querySelector('#mainPopup').addEventListener('click', function(ev) {
     }
 });
 
-document.querySelector('#main').addEventListener('click', function(ev) {
-    if (ev.target.id === 'siteconfig_show') {
-        var v = document.getElementById('siteconfig');
-        if (v.style.display === 'none')
-            v.style.display = 'block';
-        else
-            v.style.display = 'none';
-    }
+document.querySelector('#siteconfig_show').addEventListener('click', function(ev) {
+    let sc = document.querySelector('#siteconfig');
+    sc.style.transform = 'scale(0,0)';
+    sc.style.transformOrigin = '0 0';
+    sc.style.transition = 'none';
+    window.setTimeout(()=>{
+        sc.style.transition = '0.2s ease-out';
+        sc.style.transform = 'scale(1,1)';
+    }, 1);
+    ui.show(sc);
+    ui.hide('#siteconfig_show');
 });
 
 }());
