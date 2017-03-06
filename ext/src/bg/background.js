@@ -130,12 +130,18 @@ function store_update(d) {
     chrome.storage.sync.set(syncset);
 }
 
-function promised_storage_get(keys) {
+function promised_storage_get(sync, keys) {
     return new Promise((resolve, fail) => {
-        chrome.storage.sync.get(keys, itms => {
-            if (itms === undefined) resolve({});
-            else resolve(itms);
-        });
+        if (sync)
+            chrome.storage.sync.get(keys, itms => {
+                if (itms === undefined) resolve({});
+                else resolve(itms);
+            });
+        else
+            chrome.storage.local.get(keys, itms => {
+                if (itms === undefined) resolve({});
+                else resolve(itms);
+            });
     });
 }
 
@@ -143,7 +149,7 @@ function store_get(keys) {
     const setting_keys = ['defaulttype', 'passwdtimeout', 'pass_to_clipboard', 'max_alg_version', 'pass_store'];
     let k2 = []; k2.push.apply(k2, keys); k2.push.apply(k2, setting_keys);
     k2 = [...new Set(k2)];
-    let p1 = promised_storage_get(k2);
+    let p1 = promised_storage_get(true, k2);
     return Promise.all([p1])
     .then(v => {
         let [webext] = v;
@@ -200,13 +206,13 @@ function store_get(keys) {
 window.store_update = store_update;
 window.store_get = store_get;
 
-Promise.all([new Promise((r,f) => {chrome.management.getSelf(res=>{r(res);})}), promised_storage_get(['releasenote_version'])])
+Promise.all([new Promise((r,f) => {chrome.management.getSelf(res=>{r(res);})}), promised_storage_get(false, ['releasenote_version'])])
 .then(c => {
     if (c[0].version !== c[1].releasenote_version) {
         chrome.tabs.create({
             url: "/src/options/releasenote.html"
           });
-        chrome.storage.sync.set({releasenote_version: c[0].version});
+        chrome.storage.local.set({releasenote_version: c[0].version});
     }
 })
 .catch(e => {
