@@ -102,8 +102,9 @@ function store_update(d) {
     Object.keys(d).forEach(k => {
         switch (k) {
             case 'force_update':
-            case 'passwdtimeout':
                 break;
+            case 'passwdtimeout':
+            case 'pass_store':
             case 'defaulttype':
             case 'pass_to_clipboard':
                 syncset[k] = d[k];
