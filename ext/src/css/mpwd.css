@@ -250,6 +250,11 @@ button#siteconfig_show {
   text-overflow: ellipsis;
 }
 
+.warning_message {
+    color: white;
+    background-color: red;
+}
+
 #usermessage.warning_message {
     color: white;
     background-color: red;
