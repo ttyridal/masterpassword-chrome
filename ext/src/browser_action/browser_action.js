@@ -256,6 +256,8 @@ function popup(session_store_) {
 
     get_active_tab_url()
     .then(function(url){
+        if (url.startsWith('about:') || url.startsWith('chrome-extension:') || url.startsWith('chrome:'))
+            url = '';
         var domain = parse_uri(url).domain.split("."),
             significant_parts = 2;
         if (domain.length > 2 && domain[domain.length-2].toLowerCase() === "co")
