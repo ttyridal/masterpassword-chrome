@@ -302,7 +302,7 @@ button#siteconfig_show {
 
 .configitem > label {
     margin-left: 1em;
-    font-size: 0.8em;
+    font-size: 0.9em;
     min-width: 14em;
     float:left;
 }
@@ -331,4 +331,23 @@ button#siteconfig_show {
 .list-clean {
     margin-top: 0;
     list-style-type: none;
+}
+
+.backdrop {
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    background:rgba(0,0,0,0.7);
+    z-index:500;
+}
+.dialog {
+    border:2px black inset;
+    position:fixed;
+    top:5em;left:5em;
+    width:50%;
+    background:white;
+	color:black;
+    padding: 1em;
 }

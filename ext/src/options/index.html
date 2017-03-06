@@ -34,8 +34,8 @@
         <h2 class="accordion_toggle">Global settings</h2>
         <div>
             <div class="configitem">
-                <label class="w3-label w3-small w3-text-white" for="passwdtype">Default password type:</label>
-                 <select class="w3-select w3-small w3-border" id="passwdtype">
+                <label for="passwdtype">Default password type:</label>
+                 <select id="passwdtype">
                     <option value="x">Maximum
                     <option value="l" selected>Long
                     <option value="m">Medium
@@ -49,8 +49,8 @@
                 </select>
             </div>
             <div class="configitem">
-                <label class="w3-label w3-small w3-text-white" for="passwdtimeout">Remember password:</label>
-                <select class="w3-select w3-small w3-border" id="passwdtimeout">
+                <label for="passwdtimeout">Remember password:</label>
+                <select id="passwdtimeout">
                     <option value="0">Never
                     <option value="5">5 minutes
                     <option value="15">15 minutes
@@ -84,6 +84,17 @@
             <p class="">(You can drag-drop a .mpsites file here to import it)</p>
             <table class="" id="stored_sites">
                 <thead><tr><th>sitename<th>(matching)<th>Login<th>count<th>type<th>ver
+                <template id="stored_sites_row">
+                <tr>
+                    <td>sitename</td>
+                    <td><input class="domainvalue" type="text" data-old="domain" value="domain"></td>
+                    <td>loginname</td>
+                    <td>count</td>
+                    <td>type</td>
+                    <td>ver</td>
+                    <td><div class="fa fa-times-circle delete" aria-hidden="true"></div></td>
+                </tr>
+                </template>
             <tbody>
             </table>
         </div>
@@ -111,6 +122,23 @@
             Copyright 2017 <a href="https://torbjorn.tyridal.no">Torbjørn Tyridal</a><br>
         </div>
     </div>
+
+
+<div id="conflict_resolve" class="backdrop" style="display:none">
+    <div class="dialog">
+        <h2>Conflicting <span class="sitename"></span> (<small class="domainvalue"></small>)</h2>
+        <h3>existing</h3>
+        type: <span class="existing_type"></span>
+        count: <span class="existing_count"></span>
+        username: <span class="existing_username"></span>
+        <h3>importing</h3>
+        type: <span class="new_type"></span>
+        count: <span class="new_count"></span>
+        username: <span class="new_username"></span>
+        <div style="padding-top:1em"><button id="existing">Keep existing</button> <button id="imported">Replace with imported</button></div>
+    </div>
+</div>
+
 <script src="globaloptions.js"></script>
 <script src="mpw-utils.js"></script>
 <script src="options.js"></script>

@@ -251,7 +251,6 @@ function popup(session_store_) {
     } else {
         recalc = true;
         ui.show('#main');
-        ui.show('#config');
     }
 
     get_active_tab_url()
@@ -288,7 +287,6 @@ window.addEventListener('load', function () {
             e.target = "_blank";
             e.textContent = "Help?";
             data.masterkey=undefined;
-//         document.getElementById('pwgw_fail_msg').style.display = data.pwgw_failure ? 'inherit' : 'none';
         } else
             ui.user_info("");
         popup(data);
@@ -322,7 +320,6 @@ document.querySelector('#sessionsetup > form').addEventListener('submit', functi
 
         ui.hide('#sessionsetup');
         ui.show('#main');
-        ui.show('#config');
         recalculate();
     }
 });
@@ -392,7 +389,7 @@ document.querySelector('#main').addEventListener('change', function(ev){
 document.querySelector('#thepassword').addEventListener('click', function(ev) {
     let t = ev.target.parentNode;
     let dp = t.getAttribute('data-pass');
-    if (dp != null) {
+    if (dp) {
         t.textContent = dp;
         t.setAttribute('data-visible', 'true');
     }
@@ -413,7 +410,6 @@ document.querySelector('body').addEventListener('click', function(ev) {
     }
     else if (ev.target.classList.contains('btnlogout')) {
         session_store.masterkey = null;
-        ui.hide('#config');
         chrome.extension.getBackgroundPage().store_update({masterkey: null});
         popup(session_store);
         ui.user_info("Session destroyed");
