@@ -27,7 +27,8 @@ main p {
     margin-bottom: 1em;
 }
 
-main a, main a:link {
+main a, main a:link,
+.hightlight-links a, .hightlight-links a:link{
     font-style: italic;
     text-decoration: underline;
 }
@@ -325,4 +326,9 @@ button#siteconfig_show {
 
 #stored_sites input {
     font-size: 1em;
+}
+
+.list-clean {
+    margin-top: 0;
+    list-style-type: none;
 }
