@@ -188,7 +188,7 @@ function store_get(keys) {
         return r;
     })
     .then(r => {
-        if (settings.pass_store !== 'n' && keys.indexOf('masterkey') !== -1) {
+        if (settings.pass_store) {
             return Promise.all([r,
                 pwvault_gateway({'type':'pwget', 'name':'default'})
                 .catch(err => {
