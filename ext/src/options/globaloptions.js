@@ -11,14 +11,18 @@ document.querySelector('#pass_to_clipboard').addEventListener('change', function
 document.querySelector('#pass_store').addEventListener('change', function() {
     chrome.extension.getBackgroundPage().store_update({pass_store: this.checked});
 });
+document.querySelector('#auto_submit_pass').addEventListener('change', function() {
+    chrome.extension.getBackgroundPage().store_update({auto_submit_pass: this.checked});
+});
 
 window.addEventListener('load', function() {
     chrome.extension.getBackgroundPage().store_get(
-        ['defaulttype','passwdtimeout', 'pass_to_clipboard', 'pass_store'])
+        ['defaulttype','passwdtimeout', 'pass_to_clipboard', 'pass_store', 'auto_submit_pass'])
     .then(data => {
         document.querySelector('#passwdtype').value = data.defaulttype;
         document.querySelector('#passwdtimeout').value = data.passwdtimeout;
         document.querySelector('#pass_to_clipboard').checked = data.pass_to_clipboard;
         document.querySelector('#pass_store').checked = data.pass_store;
+        document.querySelector('#auto_submit_pass').checked = data.auto_submit_pass;
     });
 });

@@ -65,6 +65,7 @@ var settings = {
     'passwdtimeout': -1,
     'pass_store': false,
     'pass_to_clipboard': true,
+    'auto_submit_pass': false,
     'max_alg_version': 3
 };
 
@@ -107,6 +108,7 @@ function store_update(d) {
             case 'pass_store':
             case 'defaulttype':
             case 'pass_to_clipboard':
+            case 'auto_submit_pass':
                 syncset[k] = d[k];
                 break;
             case 'username':
@@ -147,7 +149,7 @@ function promised_storage_get(sync, keys) {
 }
 
 function store_get(keys) {
-    const setting_keys = ['defaulttype', 'passwdtimeout', 'pass_to_clipboard', 'max_alg_version', 'pass_store'];
+    const setting_keys = ['defaulttype', 'passwdtimeout', 'pass_to_clipboard', 'max_alg_version', 'pass_store', 'auto_submit_pass'];
     let k2 = []; k2.push.apply(k2, keys); k2.push.apply(k2, setting_keys);
     k2 = [...new Set(k2)];
     let p1 = promised_storage_get(true, k2);
@@ -168,6 +170,7 @@ function store_get(keys) {
                 case 'passwdtimeout':
                 case 'pass_store':
                 case 'pass_to_clipboard':
+                case 'auto_submit_pass':
                 case 'max_alg_version':
                     r[k] = settings[k];
                     break;
@@ -263,6 +266,9 @@ function update_page_password(pass, allow_subframe) {
                    throw new Update_pass_failed("Not pasting to subframe");
 
                 let code = 'document.activeElement.value = ' + JSON.stringify(pass) + '; document.activeElement.dispatchEvent(new Event("change", {bubbles: true, cancelable: true}));';
+                if (settings.auto_submit_pass)
+                    code += '(document.activeElement.form && window.setTimeout(()=>{document.activeElement.form.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));},20));';
+
                return chrome.tabs.executeScript(r.tab.id, {
                    code: code,
                    frameId: r.frameId,
