@@ -65,6 +65,7 @@ var settings = {
     'passwdtimeout': -1,
     'pass_store': false,
     'pass_to_clipboard': true,
+    'auto_submit_username': false,
     'auto_submit_pass': false,
     'max_alg_version': 3
 };
@@ -97,7 +98,8 @@ function store_update(d) {
             chrome.alarms.clear(pw_retention_timer);
     }
     if (d.pass_store !== undefined) {
-        settings.pass_store = !(d.pass_store === false || d.pass_store === 'n')
+        d.pass_store = !(d.pass_store === false || d.pass_store === 'n');
+        settings.pass_store = d.pass_store;
     }
 
     Object.keys(d).forEach(k => {
@@ -109,7 +111,8 @@ function store_update(d) {
             case 'defaulttype':
             case 'pass_to_clipboard':
             case 'auto_submit_pass':
-                syncset[k] = d[k];
+            case 'auto_submit_username':
+                settings[k] = syncset[k] = d[k];
                 break;
             case 'username':
             case 'key_id':
@@ -149,7 +152,14 @@ function promised_storage_get(sync, keys) {
 }
 
 function store_get(keys) {
-    const setting_keys = ['defaulttype', 'passwdtimeout', 'pass_to_clipboard', 'max_alg_version', 'pass_store', 'auto_submit_pass'];
+    const setting_keys = [
+        'defaulttype',
+        'passwdtimeout',
+        'pass_to_clipboard',
+        'max_alg_version',
+        'pass_store',
+        'auto_submit_pass',
+        'auto_submit_username'];
     let k2 = []; k2.push.apply(k2, keys); k2.push.apply(k2, setting_keys);
     k2 = [...new Set(k2)];
     let p1 = promised_storage_get(true, k2);
@@ -171,6 +181,7 @@ function store_get(keys) {
                 case 'pass_store':
                 case 'pass_to_clipboard':
                 case 'auto_submit_pass':
+                case 'auto_submit_username':
                 case 'max_alg_version':
                     r[k] = settings[k];
                     break;
@@ -274,7 +285,7 @@ function _insert_password(args) {
 }
 
 
-function update_page_password(pass, allow_subframe) {
+function update_page_password(pass, username, allow_subframe) {
     return current_tab()
            .then(find_active_input)
            .then(r=>{
