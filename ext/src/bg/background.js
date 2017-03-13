@@ -272,14 +272,42 @@ Update_pass_failed.prototype = new IntermediateInheritor();
 
 
 function _insert_password(args) {
-    document.activeElement.dispatchEvent(new Event('focus', {bubbles: false, cancelable: true}));
-    document.activeElement.dispatchEvent(new Event('focusin', {bubbles: true, cancelable: true}));
+    let inputf = (document.activeElement &&
+            document.activeElement.matches('input') &&
+            document.activeElement);
+    let pwinput = (inputf && inputf.type.toLowerCase() === 'password' && inputf);
+
+    if (!inputf) {
+        console.warn("inject - but not an active input");
+        return;
+    }
+
+    if (!pwinput) {
+        let inputs = document.querySelectorAll('input');
+        let idx = 0;
+        for (; inputs[idx] && inputs[idx] != inputf; idx++){};
+        let sib = inputs[idx+1];
+
+        if (args.username && sib && sib.type.toLowerCase() === 'password' && inputf.form == sib.form) {
+            pwinput = sib;
+            if (!inputf.value) {
+                inputf.value = args.username;
+                inputf.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
+            }
+        } else {
+            console.warn("inject - but nextSibling input is not password");
+            return;
+        }
+    }
+
+    pwinput.dispatchEvent(new Event('focus', {bubbles: false, cancelable: true}));
+    pwinput.dispatchEvent(new Event('focusin', {bubbles: true, cancelable: true}));
     window.setTimeout(()=>{
-        document.activeElement.value = args.pass;
-        document.activeElement.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
-        if (args.autosubmit && document.activeElement.form)
+        pwinput.value = args.pass;
+        pwinput.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
+        if (args.autosubmit && pwinput.form)
             window.setTimeout(()=>{
-                document.activeElement.form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+                pwinput.form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
             },20);
     },20);
 }
@@ -289,12 +317,15 @@ function update_page_password(pass, username, allow_subframe) {
     return current_tab()
            .then(find_active_input)
            .then(r=>{
-               if (r.tgt.type !== 'password')
+               if (r.tgt.type.toLowerCase() === 'password') {}
+               else if ((r.tgt.type === '' || r.tgt.type.toLowerCase() === 'text') &&
+                    r.tgt.name.match(/.*(user|name|email|login).*/ig)) {}
+               else
                    throw new Update_pass_failed("no password field selected");
                if (!allow_subframe && r.frameId)
                    throw new Update_pass_failed("Not pasting to subframe");
-
-               let args = { pass: pass, autosubmit: settings.auto_submit_pass };
+               username = (settings.auto_submit_username && username);
+               let args = { pass: pass, username: username, autosubmit: settings.auto_submit_pass };
                return chrome.tabs.executeScript(r.tab.id, {
                    code: ';('+_insert_password+'('+JSON.stringify(args)+'));',
                    frameId: r.frameId,
