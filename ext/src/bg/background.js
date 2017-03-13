@@ -260,6 +260,20 @@ IntermediateInheritor.prototype = Error.prototype;
 Update_pass_failed.prototype = new IntermediateInheritor();
 
 
+function _insert_password(args) {
+    document.activeElement.dispatchEvent(new Event('focus', {bubbles: false, cancelable: true}));
+    document.activeElement.dispatchEvent(new Event('focusin', {bubbles: true, cancelable: true}));
+    window.setTimeout(()=>{
+        document.activeElement.value = args.pass;
+        document.activeElement.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
+        if (args.autosubmit && document.activeElement.form)
+            window.setTimeout(()=>{
+                document.activeElement.form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+            },20);
+    },20);
+}
+
+
 function update_page_password(pass, allow_subframe) {
     return current_tab()
            .then(find_active_input)
@@ -269,12 +283,9 @@ function update_page_password(pass, allow_subframe) {
                if (!allow_subframe && r.frameId)
                    throw new Update_pass_failed("Not pasting to subframe");
 
-                let code = 'document.activeElement.value = ' + JSON.stringify(pass) + '; document.activeElement.dispatchEvent(new Event("change", {bubbles: true, cancelable: true}));';
-                if (settings.auto_submit_pass)
-                    code += '(document.activeElement.form && window.setTimeout(()=>{document.activeElement.form.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));},20));';
-
+               let args = { pass: pass, autosubmit: settings.auto_submit_pass };
                return chrome.tabs.executeScript(r.tab.id, {
-                   code: code,
+                   code: ';('+_insert_password+'('+JSON.stringify(args)+'));',
                    frameId: r.frameId,
                    matchAboutBlank: true
                });
