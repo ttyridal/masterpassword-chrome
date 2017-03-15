@@ -307,7 +307,10 @@ function _insert_password(args) {
         pwinput.dispatchEvent(new Event('change', {bubbles: true, cancelable: true}));
         if (args.autosubmit && pwinput.form)
             window.setTimeout(()=>{
-                pwinput.form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+                let btn = pwinput.form.querySelector('input[type=submit], button[type=submit]');
+                let cancelled = !btn.dispatchEvent(new Event('click', {bubbles: true, cancelable: true}));
+                if (!cancelled)
+                    pwinput.form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
             },20);
     },20);
 }
@@ -318,7 +321,7 @@ function update_page_password(pass, username, allow_subframe) {
            .then(find_active_input)
            .then(r=>{
                if (r.tgt.type.toLowerCase() === 'password') {}
-               else if ((r.tgt.type === '' || r.tgt.type.toLowerCase() === 'text') &&
+               else if ((r.tgt.type === '' || r.tgt.type.match(/(text|email|num|tel)/ig)) &&
                     r.tgt.name.match(/.*(user|name|email|login).*/ig)) {}
                else
                    throw new Update_pass_failed("no password field selected");
