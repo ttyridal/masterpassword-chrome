@@ -87,7 +87,7 @@ function read_mpsites(d, username, key_id, confirm_fn){
         if (!confirm_fn("Username mismatch!\n\nYou may still import this file, "+
                 "but passwords will be different from where you exported the file"))
             return undefined;
-    } else if (key_id && fheader.key_id && fheader.key_id !== key_id) {
+    } else if (key_id && fheader.key_id && fheader.key_id.toLowerCase() !== key_id.toLowerCase()) {
         if (!confirm_fn("Key ID mismatch!\n\nYou may still import this file, "+
                 "but passwords will be different from where you exported the file"))
             return undefined;
@@ -140,7 +140,7 @@ function make_mpsites(key_id, username, stored_sites, alg_min_version, alg_versi
         '# User Name: '+username+'\n',
         '# Full Name: '+username+'\n',
         '# Avatar: 0\n',
-        '# Key ID: '+key_id+'\n',
+        '# Key ID: '+key_id.toUpperCase()+'\n',
         '# Version: 2.2\n',
         '# Algorithm: '+alg_version+'\n',
         '# Default Type: 17\n',
