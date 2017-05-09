@@ -199,6 +199,9 @@ function store_get(keys) {
         return r;
     })
     .then(r => {
+        if (!keys.masterkey)
+            return r;
+
         if (settings.pass_store) {
             return Promise.all([r,
                 pwvault_gateway({'type':'pwget', 'name':'default'})
@@ -211,6 +214,9 @@ function store_get(keys) {
             return [r, {success: true, value: _masterkey}];
     })
     .then(comb => {
+        if (!keys.masterkey)
+            return comb;
+
         let [r, mk] = comb;
         if (mk && mk.success) r.masterkey = mk.value;
         else r.pwgw_failure = mk.reason;
