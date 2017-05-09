@@ -33,7 +33,10 @@ function string_is_plain_ascii(s) {
      alg_min_version = 1;
 
 function save_sites_to_backend() {
-    chrome.extension.getBackgroundPage().store_update({sites: stored_sites});
+    chrome.extension.getBackgroundPage().store_update({sites: stored_sites})
+    .catch(msg=>{
+        show_warning_dialog("Save settings failed, " + msg);
+    });
 
 }
 
@@ -312,6 +315,18 @@ function start_data_download(stringarr,filename) {
 
     // Remove anchor from body
     document.body.removeChild(a);
+}
+
+function show_warning_dialog(msg) {
+    let div = document.querySelector('#warningbox');
+    div.querySelector('#warning_message').textContent = msg;
+    function click_handler(ev) {
+        div.removeEventListener('click', click_handler);
+        div.style.display = 'none';
+    }
+
+    div.addEventListener('click', click_handler);
+    div.style.display = '';
 }
 
 }());

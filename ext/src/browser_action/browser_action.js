@@ -71,6 +71,7 @@ let ui = {
 
     user_info: function(s) {
         let e = document.querySelector('#usermessage');
+        if (e.className === 'warning_message') return;
         e.className = 'info_message';
         e.textContent = s;
     },
@@ -373,8 +374,12 @@ function save_site_changes(){
 
     session_store.sites[domain][ui.sitename()] = ui.siteconfig();
 
-    if (domain !== '')
-        chrome.extension.getBackgroundPage().store_update({sites: session_store.sites});
+    if (domain !== '') {
+        chrome.extension.getBackgroundPage().store_update({sites: session_store.sites})
+        .catch(msg=>{
+            ui.user_warn("save failed, " + msg);
+        });
+    }
     if (Object.keys(session_store.sites[domain]).length>1)
         ui.show('#storedids_dropdown');
 }

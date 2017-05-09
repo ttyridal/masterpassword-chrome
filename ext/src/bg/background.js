@@ -133,7 +133,7 @@ function store_update(d) {
                 break;
         }
     });
-    chrome.storage.sync.set(syncset);
+    return promised_storage_set(true, syncset);
 }
 
 function promised_storage_get(sync, keys) {
@@ -148,6 +148,19 @@ function promised_storage_get(sync, keys) {
                 if (itms === undefined) resolve({});
                 else resolve(itms);
             });
+    });
+}
+
+function promised_storage_set(sync, itms) {
+    return new Promise((resolve, fail) => {
+        let store = sync ? chrome.storage.sync : chrome.storage.local;
+        store.set(itms, ()=>{
+            console.log(sync, store, chrome.runtime.lastError);
+            if (chrome.runtime.lastError)
+                fail(chrome.runtime.lastError.message);
+            else
+                resolve();
+        });
     });
 }
 
