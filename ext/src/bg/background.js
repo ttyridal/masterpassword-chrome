@@ -187,7 +187,7 @@ function store_get(keys) {
     return Promise.all([p1])
     .then(v => {
         let [webext] = v;
-        webext['pass_store'] = (webext['pass_store'] === 'y' || webext['pass_store'] === true);
+        webext.pass_store = (webext.pass_store === 'y' || webext.pass_store === true);
         for (let k of setting_keys)
             settings[k] = webext[k] !== undefined ? webext[k] : settings[k];
         if (settings.passwdtimeout === 0) // clear now in case it's recently changed
@@ -328,7 +328,7 @@ function _insert_password(args) {
     if (!pwinput) {
         let inputs = document.querySelectorAll('input');
         let idx = 0;
-        for (; inputs[idx] && inputs[idx] != inputf; idx++){};
+        for (; inputs[idx] && inputs[idx] != inputf; idx++){}
         let sib = inputs[idx+1];
 
         if (args.username && sib && sib.type.toLowerCase() === 'password' && inputf.form == sib.form) {
@@ -384,7 +384,7 @@ window.store_update = store_update;
 window.store_get = store_get;
 window.update_page_password = update_page_password;
 
-Promise.all([new Promise((r,f) => {chrome.management.getSelf(res=>{r(res);})}), promised_storage_get(false, ['releasenote_version'])])
+Promise.all([new Promise((r,f) => {chrome.management.getSelf(res=>{r(res);});}), promised_storage_get(false, ['releasenote_version'])])
 .then(c => {
     if (c[0].version !== c[1].releasenote_version) {
         chrome.tabs.create({
