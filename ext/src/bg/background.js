@@ -236,7 +236,7 @@ function store_get(keys) {
             r.sites  = JSON.parse(s);
         }
 
-        if (!keys.masterkey)
+        if (keys.indexOf('masterkey') === -1)
             return r;
 
         if (settings.pass_store) {
@@ -251,7 +251,7 @@ function store_get(keys) {
             return [r, {success: true, value: _masterkey}];
     })
     .then(comb => {
-        if (!keys.masterkey)
+        if (keys.indexOf('masterkey') === -1)
             return comb;
 
         let [r, mk] = comb;
