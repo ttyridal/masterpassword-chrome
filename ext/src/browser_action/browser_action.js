@@ -64,8 +64,13 @@ let ui = {
 
     user_warn: function(s) {
         let e = document.querySelector('#usermessage');
-        e.className = 'warning_message';
-        e.textContent = s;
+        if (s === null) {
+            e.className = 'info_message';
+            e.textContent = '';
+        } else {
+            e.className = 'warning_message';
+            e.textContent = s;
+        }
         return e;
     },
 
@@ -428,6 +433,7 @@ document.querySelector('body').addEventListener('click', function(ev) {
         ui.user_info("Session destroyed");
     }
     else if (ev.target.id === 'change_keyid_ok') {
+        ui.user_warn(null);
         session_store.key_id = mpw_session.key_id();
         chrome.extension.getBackgroundPage().store_update({
             username: session_store.username,
