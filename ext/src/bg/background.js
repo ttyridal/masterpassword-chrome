@@ -116,9 +116,22 @@ function store_update(d) {
                 break;
             case 'username':
             case 'key_id':
-            case 'sites':
                 if (!chrome.extension.inIncognitoContext)
                     syncset[k] = d[k];
+                break;
+            case 'sites':
+                if (!chrome.extension.inIncognitoContext) {
+                    let s = JSON.stringify(d[k]);
+                    if (s.length > chrome.storage.sync.QUOTA_BYTES_PER_ITEM) {
+                        let re = new RegExp('.{1,' + (chrome.storage.sync.QUOTA_BYTES_PER_ITEM/2) + '}', 'g');
+                        s = re[Symbol.match](s);
+                        let i = 0;
+                        for (; i < s.length; i++)
+                            syncset['sites' + i] = s[i];
+                        syncset.sites = i;
+                    } else
+                        syncset[k] = d[k];
+                }
                 break;
             case 'masterkey':
                 if (settings.pass_store) {
@@ -138,16 +151,12 @@ function store_update(d) {
 
 function promised_storage_get(sync, keys) {
     return new Promise((resolve, fail) => {
-        if (sync)
-            chrome.storage.sync.get(keys, itms => {
-                if (itms === undefined) resolve({});
-                else resolve(itms);
-            });
-        else
-            chrome.storage.local.get(keys, itms => {
-                if (itms === undefined) resolve({});
-                else resolve(itms);
-            });
+        let store = sync ? chrome.storage.sync : chrome.storage.local;
+
+        store.get(keys, itms => {
+            if (itms === undefined) resolve({});
+            else resolve(itms);
+        });
     });
 }
 
@@ -155,7 +164,6 @@ function promised_storage_set(sync, itms) {
     return new Promise((resolve, fail) => {
         let store = sync ? chrome.storage.sync : chrome.storage.local;
         store.set(itms, ()=>{
-            console.log(sync, store, chrome.runtime.lastError);
             if (chrome.runtime.lastError)
                 fail(chrome.runtime.lastError.message);
             else
@@ -209,9 +217,25 @@ function store_get(keys) {
                     throw new Error("unknown key requested: "+k);
             }
         }
-        return r;
+
+        if (typeof(r.sites) === 'number') {
+            let s = [];
+            for (let i = 0; i < r.sites; i++)
+                s.push('sites' + i);
+            return Promise.all([r, promised_storage_get(true, s)]);
+        }
+
+        return [r, undefined];
     })
-    .then(r => {
+    .then(comb => {
+        let [r, sites] = comb;
+        if (sites !== undefined) {
+            let s = '';
+            for (let i = 0; i < r.sites; i++)
+                s += sites['sites' + i];
+            r.sites  = JSON.parse(s);
+        }
+
         if (!keys.masterkey)
             return r;
 
