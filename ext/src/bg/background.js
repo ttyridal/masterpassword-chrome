@@ -68,6 +68,7 @@ var settings = {
     'auto_submit_username': false,
     'auto_submit_pass': false,
     'max_alg_version': 3,
+    'default_loginnames': '',
 };
 
 var _masterkey;
@@ -112,6 +113,7 @@ function store_update(d) {
             case 'pass_to_clipboard':
             case 'auto_submit_pass':
             case 'auto_submit_username':
+            case 'default_loginnames':
                 settings[k] = syncset[k] = d[k];
                 break;
             case 'username':
@@ -181,6 +183,7 @@ function store_get(keys) {
         'pass_store',
         'auto_submit_pass',
         'auto_submit_username',
+        'default_loginnames',
     ];
     let k2 = []; k2.push.apply(k2, keys); k2.push.apply(k2, setting_keys);
     k2 = [...new Set(k2)];
@@ -204,6 +207,7 @@ function store_get(keys) {
                 case 'pass_to_clipboard':
                 case 'auto_submit_pass':
                 case 'auto_submit_username':
+                case 'default_loginnames':
                 case 'max_alg_version':
                     r[k] = settings[k];
                     break;

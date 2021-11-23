@@ -93,6 +93,14 @@ let ui = {
         return r;
     },
 
+    loginname: function(v) {
+        let e = document.querySelector('#loginname'),
+            r = e.value;
+        if (v !== undefined)
+            e.value = v;
+        return r;
+    },
+
     siteconfig: function(type, generation, username) {
         let t = document.querySelector('#passwdtype'),
             g = document.querySelector('#passwdgeneration'),
@@ -242,6 +250,7 @@ function update_with_settings_for(domain) {
 
     ui.sitename(keys[0]);
     ui.siteconfig(site.type, site.generation, site.username || '');
+    loginname_dropdown_showhide();
 }
 
 function popup(session_store_) {
@@ -299,6 +308,7 @@ window.addEventListener('load', function () {
         'max_alg_version',
         'defaulttype',
         'pass_to_clipboard',
+        'default_loginnames',
     ])
     .then(data => {
         if (data.pwgw_failure) {
@@ -374,6 +384,52 @@ document.querySelector('#storedids').addEventListener('blur', e=>{
     },1);
 });
 
+// FIXME: I'd like to use the change event here, but it won't work
+//        This is to support updating if the user copy/pastes with mouse
+//        or any other input change that doesn't trigger a keyup.
+document.querySelector('#loginname').addEventListener('blur', loginname_dropdown_showhide);
+document.querySelector('#loginname').addEventListener('keyup', loginname_dropdown_showhide);
+
+function loginname_dropdown_showhide() {
+    let loginname = ui.loginname();
+    if (loginname.trim().length == 0 && session_store.default_loginnames.trim().length)
+        ui.show('#default_loginnames_dropdown');
+    else
+        ui.hide('#default_loginnames_dropdown');
+}
+
+document.querySelector('#default_loginnames_dropdown').addEventListener('click', function(ev){
+    let slogins = document.querySelector('#default_loginnames');
+
+    if (ui.toggle(slogins)) {
+        slogins.innerHTML = '';
+        session_store.default_loginnames.split('\n').forEach(u => {
+            u = u.trim();
+            if (u.length == 0) return;
+            slogins.appendChild(document.createElement('li')).textContent = u;
+        })
+        ui.show(slogins);
+        slogins.focus();
+    }
+});
+
+document.querySelector('#default_loginnames').addEventListener('click', function(ev) {
+    let loginname = ev.target.textContent;
+    ui.loginname(loginname);
+    loginname_dropdown_showhide();
+    ui.hide(ev.target.parentNode);
+    ev.target.parentNode.blur();
+    window.setTimeout(function() {
+        save_site_changes();
+        recalculate();
+    }, 1);
+});
+
+document.querySelector('#default_loginnames').addEventListener('blur', e=>{
+    window.setTimeout(()=>{
+        ui.hide(document.querySelector('#default_loginnames'));
+    },1);
+});
 
 
 function save_site_changes(){

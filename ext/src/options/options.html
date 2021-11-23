@@ -5,6 +5,10 @@
 <meta charset="UTF-8">
 <style>
 dd { margin-bottom: 0.5em}
+#default_loginnames {
+    width: 200px;
+    height: 100px;
+}
 </style>
 </head>
 <body>
@@ -40,6 +44,9 @@ dd { margin-bottom: 0.5em}
             <input id="auto_submit_username" type="checkbox"/>
         <dt><label for="pass_store">Use OS' password store</label><dd>
             <input id="pass_store" type="checkbox"/>
+        <dt><label for="default_loginnames">Default login names (for new sites)</label><dd>
+            <p>One per line</p>
+            <textarea id="default_loginnames"></textarea>
     </dl>
 <script src="globaloptions.js"></script>
 </body>
