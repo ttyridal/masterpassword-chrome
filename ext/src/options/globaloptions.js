@@ -19,8 +19,14 @@ document.querySelector('#auto_submit_username').addEventListener('change', funct
 });
 
 window.addEventListener('load', function() {
-    chrome.extension.getBackgroundPage().store_get(
-        ['defaulttype','passwdtimeout', 'pass_to_clipboard', 'pass_store', 'auto_submit_pass', 'auto_submit_username'])
+    chrome.extension.getBackgroundPage().store_get([
+        'defaulttype',
+        'passwdtimeout',
+        'pass_to_clipboard',
+        'pass_store',
+        'auto_submit_pass',
+        'auto_submit_username',
+    ])
     .then(data => {
         document.querySelector('#passwdtype').value = data.defaulttype;
         document.querySelector('#passwdtimeout').value = data.passwdtimeout;

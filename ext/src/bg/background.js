@@ -67,7 +67,7 @@ var settings = {
     'pass_to_clipboard': true,
     'auto_submit_username': false,
     'auto_submit_pass': false,
-    'max_alg_version': 3
+    'max_alg_version': 3,
 };
 
 var _masterkey;
@@ -180,7 +180,8 @@ function store_get(keys) {
         'max_alg_version',
         'pass_store',
         'auto_submit_pass',
-        'auto_submit_username'];
+        'auto_submit_username',
+    ];
     let k2 = []; k2.push.apply(k2, keys); k2.push.apply(k2, setting_keys);
     k2 = [...new Set(k2)];
     let p1 = promised_storage_get(true, k2);

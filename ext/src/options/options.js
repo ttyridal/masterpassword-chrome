@@ -91,7 +91,12 @@ function stored_sites_table_update(stored_sites) {
 }
 
 window.addEventListener('load', function() {
-    chrome.extension.getBackgroundPage().store_get(['sites', 'username', 'max_alg_version', 'key_id'])
+    chrome.extension.getBackgroundPage().store_get([
+        'sites',
+        'username',
+        'max_alg_version',
+        'key_id',
+    ])
     .then(data => {
         stored_sites = data.sites;
         username = data.username;

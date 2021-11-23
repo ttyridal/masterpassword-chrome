@@ -291,8 +291,15 @@ function popup(session_store_) {
 }
 
 window.addEventListener('load', function () {
-    chrome.extension.getBackgroundPage().store_get(
-            ['sites', 'username', 'masterkey', 'key_id', 'max_alg_version', 'defaulttype', 'pass_to_clipboard'])
+    chrome.extension.getBackgroundPage().store_get([
+        'sites',
+        'username',
+        'masterkey',
+        'key_id',
+        'max_alg_version',
+        'defaulttype',
+        'pass_to_clipboard',
+    ])
     .then(data => {
         if (data.pwgw_failure) {
             let e = ui.user_warn("System password vault failed! ");
