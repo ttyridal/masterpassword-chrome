@@ -68,6 +68,18 @@ var settings = {
     'auto_submit_username': false,
     'auto_submit_pass': false,
     'max_alg_version': 3,
+    'treat_as_same_site': [
+        '.ac.*',
+        '.co.*',
+        '.com.*',
+        '.edu.*',
+        '.geek.*',
+        '.gov.*',
+        '.govt.*',
+        '.net.*',
+        '.org.*',
+        '.school.*',
+    ].join('\n'),
 };
 
 var _masterkey;
@@ -112,6 +124,7 @@ function store_update(d) {
             case 'pass_to_clipboard':
             case 'auto_submit_pass':
             case 'auto_submit_username':
+            case 'treat_as_same_site':
                 settings[k] = syncset[k] = d[k];
                 break;
             case 'username':
@@ -181,7 +194,8 @@ function store_get(keys) {
         'pass_store',
         'auto_submit_pass',
         'auto_submit_username',
-    ];
+        'treat_as_same_site',
+	];
     let k2 = []; k2.push.apply(k2, keys); k2.push.apply(k2, setting_keys);
     k2 = [...new Set(k2)];
     let p1 = promised_storage_get(true, k2);
@@ -204,6 +218,7 @@ function store_get(keys) {
                 case 'pass_to_clipboard':
                 case 'auto_submit_pass':
                 case 'auto_submit_username':
+                case 'treat_as_same_site':
                 case 'max_alg_version':
                     r[k] = settings[k];
                     break;

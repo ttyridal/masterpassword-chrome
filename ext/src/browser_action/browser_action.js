@@ -35,6 +35,11 @@ function parse_uri(sourceUri){
     return uri;
 }
 
+function regexp_escape(string) {
+    // https://stackoverflow.com/a/6969486
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 let ui = {
     hide: function(el) {
         if (typeof el === 'string')
@@ -271,16 +276,49 @@ function popup(session_store_) {
     .then(function(url){
         if (url.startsWith('about:') || url.startsWith('chrome-extension:') || url.startsWith('chrome:'))
             url = '';
-        var domain = parse_uri(url).domain.split("."),
-            significant_parts = 2;
-        if (domain.length > 2 && domain[domain.length-2].toLowerCase() === "co")
-            significant_parts = 3;
-        while(domain.length > 1 && domain.length > significant_parts)
-            domain.shift();
-        domain = domain.join(".");
+
+        var conf_treat_as_same_site = session_store.treat_as_same_site;
+
+        var rxDomainMatchers = [
+            /([^\.]+\.[^\.]+)$/i,   // Default matcher matches two-part domain names (.* pattern) i.e. github.com
+        ];
+
+        conf_treat_as_same_site.split('\n').forEach(function(pattern) {
+            pattern = pattern.trim();
+            if (pattern.length == 0) return;
+            if (!pattern.startsWith('.')) return;
+            if (pattern.endsWith('.')) return;
+            //FIXME: More strict domain character parsing.
+            pattern = '*' + pattern;
+            pattern = regexp_escape(pattern);
+            pattern = pattern.replace(/\\\*/g, '[^\.]+');
+            rxDomainMatchers.push(new RegExp(pattern, 'i'));
+        });
+
+        var urlDomain = parse_uri(url).domain;
+        var domainMatched = null;
+
+        rxDomainMatchers.forEach(function(rx) {
+            var rxResult = rx.exec(urlDomain);
+            if (!rxResult) return;
+
+            if (domainMatched == null)
+                return domainMatched = rxResult[0];
+            
+            // Select domain with most parts that matches
+            var domainMatchedParts = domainMatched.split('.');
+            var domainThisParts = rxResult[0].split('.');
+
+            if (domainThisParts.length > domainMatchedParts.length) 
+                domainMatched = rxResult[0];
+        });
+
+        if (domainMatched == null) 
+            throw 'Could not match any sites! Check your configuration settings!';
+
         for (let d of document.querySelectorAll('.domain'))
-            d.value = domain;
-        update_with_settings_for(domain);
+            d.value = domainMatched;
+        update_with_settings_for(domainMatched);
         if(recalc) {
             recalculate();
         }
@@ -299,6 +337,7 @@ window.addEventListener('load', function () {
         'max_alg_version',
         'defaulttype',
         'pass_to_clipboard',
+        'treat_as_same_site',
     ])
     .then(data => {
         if (data.pwgw_failure) {

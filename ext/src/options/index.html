@@ -76,6 +76,17 @@
                 <label for="pass_store">Use OS' password store</label>
                 <input id="pass_store" type="checkbox"/>
             </div>
+            <div class="configitem">
+                <label for="treat_as_same_site">Override as same site</label>
+                <textarea id="treat_as_same_site"></textarea>
+                <p>
+                    Enter overrides above, one per line<br />
+                    lines must start with a . (period)<br />
+                    lines that cannot be parsed are ignored<br />
+                    * is wildcard, will match anything except . (period)<br />
+                    Example: .net.* will treat x.net.nz as a site, instead of ignoring x and using net.nz as the site<br />
+                </p>
+            </div>
         </div>
     </div>
 

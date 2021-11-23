@@ -17,6 +17,9 @@ document.querySelector('#auto_submit_pass').addEventListener('change', function(
 document.querySelector('#auto_submit_username').addEventListener('change', function() {
     chrome.extension.getBackgroundPage().store_update({auto_submit_username: this.checked});
 });
+document.querySelector('#treat_as_same_site').addEventListener('change', function() {
+    chrome.extension.getBackgroundPage().store_update({treat_as_same_site: this.value});
+});
 
 window.addEventListener('load', function() {
     chrome.extension.getBackgroundPage().store_get([
@@ -26,6 +29,7 @@ window.addEventListener('load', function() {
         'pass_store',
         'auto_submit_pass',
         'auto_submit_username',
+        'treat_as_same_site',
     ])
     .then(data => {
         document.querySelector('#passwdtype').value = data.defaulttype;
@@ -34,5 +38,6 @@ window.addEventListener('load', function() {
         document.querySelector('#pass_store').checked = data.pass_store;
         document.querySelector('#auto_submit_pass').checked = data.auto_submit_pass;
         document.querySelector('#auto_submit_username').checked = data.auto_submit_username;
+        document.querySelector('#treat_as_same_site').value = data.treat_as_same_site;
     });
 });

@@ -312,6 +312,7 @@ button#siteconfig_show {
 
 .configitem > input,
 .configitem > select,
+.configitem > textarea,
 .configitem > option {
     display: block;
     clear: both;
@@ -325,6 +326,16 @@ button#siteconfig_show {
 }
 .configitem > input[type=checkbox] {
     width: 3em;
+}
+
+.configitem > textarea#treat_as_same_site {
+    width: 300px;
+    height: 300px;
+}
+
+.configitem > p {
+    clear: both;
+    padding-left: 3em;
 }
 
 #stored_sites {

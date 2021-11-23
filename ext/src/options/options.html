@@ -5,6 +5,10 @@
 <meta charset="UTF-8">
 <style>
 dd { margin-bottom: 0.5em}
+#treat_as_same_site {
+    width: 300px;
+    height: 300px;
+}
 </style>
 </head>
 <body>
@@ -40,6 +44,15 @@ dd { margin-bottom: 0.5em}
             <input id="auto_submit_username" type="checkbox"/>
         <dt><label for="pass_store">Use OS' password store</label><dd>
             <input id="pass_store" type="checkbox"/>
+        <dt><label for="treat_as_same_site">Override as same site</label><dd>
+            <textarea id="treat_as_same_site"></textarea>
+            <p>
+                Enter overrides above, one per line<br />
+                lines must start with a . (period)<br />
+                lines that cannot be parsed are ignored<br />
+                * is wildcard, will match anything except . (period)<br />
+                Example: .net.* will treat x.net.nz as a site, instead of ignoring x and using net.nz as the site<br />
+            </p>
     </dl>
 <script src="globaloptions.js"></script>
 </body>
